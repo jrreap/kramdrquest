@@ -9,19 +9,18 @@
     "start": "expo start"
   },
   "devDependencies": {
-    "babel-preset-expo": "^8.1.0"
+    "babel-preset-expo": "8.3.0"
   },
   "dependencies": {
-    "@expo/vector-icons": "^10.0.0",
-    "expo": "^37.0.0",
-    "expo-av": "~8.1.0",
-    "expo-cli": "^3.18.4",
-    "expo-constants": "~9.0.0",
-    "react": "16.9.0",
+    "@expo/vector-icons": "^12.0.0",
+    "expo": "^40.0.0",
+    "expo-av": "~8.7.0",
+    "expo-constants": "~9.3.3",
+    "react": "16.13.1",
     "react-game-kit": "1.0.6",
-    "react-native": "https://github.com/expo/react-native/archive/sdk-37.0.0.tar.gz",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-40.0.1.tar.gz",
     "react-native-animatable": "1.3.2",
-    "react-native-gesture-handler": "~1.6.0",
+    "react-native-gesture-handler": "~1.8.0",
     "react-native-paper": "2.2.8",
     "react-native-sound": "0.10.12",
     "react-navigation": "3.9.1",

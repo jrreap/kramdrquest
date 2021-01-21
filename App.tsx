@@ -14,7 +14,7 @@ import {
 /*
           ======= KRAMDRQUEST =======
         The pocket sized adventure game
-        Developed by Jaydon Reap (2019)
+        Developed by Jrreap (2019)
                 Version 0.0.1
 
               ----Features----
@@ -62,9 +62,9 @@ let _pops = 25
 let _years = 1
 
 const audio = new Audio.Sound()
-let mainaudio = new Audio.Sound()
+const mainaudio = new Audio.Sound()
 
-let seal = { icon: 'sword', level: 0 }
+const seal = { icon: 'sword', level: 0 }
 
 // Game booleans and temp variables
 let inBattle = false
@@ -334,7 +334,7 @@ class Defeat extends React.Component {
           {this._renderKramdr(stats)}
 
           <TouchableHighlight
-style={{ paddingTop: 10 }}
+            style={{ paddingTop: 10 }}
             onPress={() => {
               this.props.navigation.navigate('NewGameScreen')
             }}
@@ -381,7 +381,6 @@ class Home extends React.Component {
   _removeHealth (amount) {
     if (_health - amount > 0) {
       _health -= amount
-
     } else {
       this.props.navigation.navigate('Defeat')
     }
@@ -412,7 +411,7 @@ class Home extends React.Component {
       inBattle = false
       this._calculateLoot(_enemycount)
       _enemycount = 0
-      return;
+      return
     }
 
     if (_currentWarrior === deadenemy && _warriors > 0) {
@@ -426,7 +425,7 @@ class Home extends React.Component {
       inBattle = false
       _enemycount = 0
       this._removeHealth(1)
-      return;
+      return
     }
 
     if (_currentWarrior.damage * this._rollDice() < _currentEnemy.damage * this._rollDice()) {
@@ -471,7 +470,7 @@ class Home extends React.Component {
   // Quest system, responsible for determing if a card is unlocked or not
   _createQuestQuestion () {
     const question = quests[cardindex - 1]
-    let dice = this._rollDice()
+    const dice = this._rollDice()
 
     if (dice > 3) {
       return question.response1
@@ -485,7 +484,7 @@ class Home extends React.Component {
     if (response) {
       if (cardindex < cards.length) {
         cards[cardindex].unlocked = true
-      cardindex++
+        cardindex++
         this._runUI(state, false)
       }
     } else {
@@ -503,10 +502,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       case 'Train': {
@@ -515,10 +514,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       case 'Moo Mula': {
@@ -527,10 +526,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       case 'Dig In': {
@@ -538,10 +537,10 @@ class Home extends React.Component {
           _coin -= card.cost
           duginhp += 5
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       case 'Patronage': {
@@ -550,10 +549,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       case 'Arrow Storm': {
@@ -568,10 +567,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
       // Straight up the most OP card
@@ -584,10 +583,10 @@ class Home extends React.Component {
           _coin -= card.cost
           _pops -= card.popcost
           this._runUI(state, false)
-          break;
+          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break;
+          break
         }
       }
     }
@@ -690,7 +689,7 @@ class Home extends React.Component {
               <Text style={{ padding: 10 }}>VS</Text>
               <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
             </View>
-        </View>
+          </View>
         )
       }
     } else {
@@ -842,7 +841,7 @@ class Home extends React.Component {
   // Adds in spacers to the array to make the deck look a bit fancier
   _processCardDeck () {
     let i = 0
-    let spacer = <View style={styles.spacer} />
+    const spacer = <View style={styles.spacer} />
     const data = this._renderCardDeck()
     while (i <= data.length) {
       data.splice(i, 0, spacer)
@@ -894,9 +893,9 @@ class Home extends React.Component {
                   <TouchableHighlight
                     onPress={(state) => this._processQuestQuestion(state, true)}
                     underlayColor='#c4c4c4'
-                    >
+                  >
                     <View style={styles.button}>
-                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5  }}>Yes</Text>
+                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5 }}>Yes</Text>
                     </View>
                   </TouchableHighlight>
                 </View>
@@ -904,9 +903,9 @@ class Home extends React.Component {
                   <TouchableHighlight
                     onPress={(state) => this._processQuestQuestion(state, false)}
                     underlayColor='#c4c4c4'
-                      >
+                  >
                     <View style={styles.button}>
-                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5  }}>No</Text>
+                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5 }}>No</Text>
                     </View>
                   </TouchableHighlight>
                 </View>
@@ -932,7 +931,7 @@ class Home extends React.Component {
               underlayColor='#c4c4c4'
             >
               <View style={styles.button}>
-                <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', paddingLeft: 5  }}>Next Turn</Text>
+                <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', paddingLeft: 5 }}>Next Turn</Text>
               </View>
             </TouchableHighlight>
           </View>
@@ -947,7 +946,7 @@ class Home extends React.Component {
                   <Text>This is the card deck, tap a card to use it to help keep your kingdom under control!</Text>
                   <ScrollView contentContainerStyle={{ padding: 5, justifyContent: 'space-between' }} style={styles.carddeck} horizontal>
 
-                  {this._processCardDeck()}
+                    {this._processCardDeck()}
 
                   </ScrollView>
                 </View>

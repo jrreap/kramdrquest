@@ -1,17 +1,13 @@
 {
   "expo": {
     "name": "kramdrquest",
-    "description": "Designed in 2019",
+    "description": "The pocket sized adventure game",
     "slug": "snack-da6bc896-61ad-4c30-b536-657ec7f1ed87",
     "privacy": "unlisted",
     "version": "1.0.0",
     "orientation": "portrait",
     "primaryColor": "#cccccc",
     "icon": "https://d1wp6m56sqw74a.cloudfront.net/~assets/c9aa1be8a6a6fe81e20c3ac4106a2ebc",
-    "loading": {
-      "icon": "https://d1wp6m56sqw74a.cloudfront.net/~assets/c9aa1be8a6a6fe81e20c3ac4106a2ebc",
-      "hideExponentText": false
-    },
     "packagerOpts": {
       "assetExts": [
         "ttf",

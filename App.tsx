@@ -2,7 +2,6 @@ import * as React from 'react'
 import {
   Text,
   View,
-  StyleSheet,
   Alert,
   TouchableHighlight,
   TouchableOpacity,
@@ -37,18 +36,13 @@ import {
 // it was simply easier to just keep everything in one file for now so I didn't have to mess with props... so yeah be warned!
 
 // Default expo stuff
-import Constants from 'expo-constants'
 import { Audio } from 'expo-av'
 
 // Additional Packages/Icons via NPM
 import * as Animatable from 'react-native-animatable'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { createAppContainer, createStackNavigator } from 'react-navigation'
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons'
-
-// For reference in sizing the modal
-const devicewidth = Dimensions.get('window').width
-const deviceheight = Dimensions.get('window').height
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 
 // Global Variables
 // default stuff, game changes are stored in the state but these are the base
@@ -71,7 +65,6 @@ let inBattle = false
 let _enemycount = 0
 let _currentWarrior = null
 let _currentEnemy = null
-let _notdead = true
 let combatlevel = 0
 let danger = 1
 let _question = ' '
@@ -834,113 +827,6 @@ class Home extends React.Component {
     )
   }
 }
-
-// All CSS styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: Constants.statusBarHeight
-  },
-  popupcontainer: {
-    flex: 1,
-    paddingTop: Constants.statusBarHeight,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5
-  },
-  popupinnercontainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: devicewidth - 40,
-    borderRadius: 10,
-    backgroundColor: '#c4c4c4'
-  },
-  cardcontainer: {
-    flex: 1,
-    padding: 10
-  },
-  combatcontainer: {
-    padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  combatinnercontainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row'
-  },
-  panel: {
-    flex: 1,
-    backgroundColor: 'white',
-    position: 'relative'
-  },
-  panelHeader: {
-    height: 50,
-    backgroundColor: '#b197fc',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  innercontainer: {
-    flex: 10,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    alignItems: 'center'
-  },
-  carddeck: {
-  },
-  card: {
-    width: 120,
-    height: 170,
-    backgroundColor: '#c1c1c1',
-    borderRadius: 10,
-    justifyContent: 'center',
-    textAlign: 'center'
-  },
-  spacer: {
-    width: 15
-  },
-  toolbar: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#c4c4c4',
-    borderColor: 'black',
-    flexDirection: 'row'
-  },
-  toolbarbutton: {
-    justifyContent: 'center',
-    padding: 10
-  },
-  paragraph: {
-    margin: 24,
-    fontSize: 18,
-    textAlign: 'center'
-  },
-  header: {
-    margin: 24,
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  counter: {
-    fontSize: 30
-  },
-  button: {
-    width: 120,
-    height: 45,
-    backgroundColor: '#4286f4',
-    padding: 5,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignContent: 'center',
-    textAlign: 'center'
-  }
-})
 
 // SCREEN CONTROLLER/APP OUTPUT
 const AppNavigator = createStackNavigator(

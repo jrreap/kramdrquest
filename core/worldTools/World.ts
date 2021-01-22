@@ -13,11 +13,17 @@ class World {
 
   inBattle = false
   enemycount = 0
-  currentWarrior = null
-  currentEnemy = null
+  currentWarrior = {}
+  currentEnemy = {}
   notdead = true
+  combatlevel = 0
+  danger = 1
 
   seal = { icon: 'sword', level: 0 }
+
+  duginhp = 0
+  warriorbuff = 0
+  patronage = 0
 
   constructor() {
     this.generateWorld()

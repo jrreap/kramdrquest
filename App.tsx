@@ -6,9 +6,12 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
-  Modal
+  Modal,
+  Dimensions
 } from 'react-native'
+
+import { styles } from './core/consts'
+import NewGame from './components/NewGame'
 
 /*
           ======= KRAMDRQUEST =======
@@ -35,44 +38,15 @@ import {
 // Word of warning yes I know some of this stuff should be in other components (its react best practices after all)
 // it was simply easier to just keep everything in one file for now so I didn't have to mess with props... so yeah be warned!
 
-// Default expo stuff
-import { Audio } from 'expo-av'
 
 // Additional Packages/Icons via NPM
 import * as Animatable from 'react-native-animatable'
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { createAppContainer, createStackNavigator } from 'react-navigation'
+import { createAppContainer, createStackNavigator, NavigationProp } from 'react-navigation'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import World from './core/worldTools/World'
 
-// Global Variables
-// default stuff, game changes are stored in the state but these are the base
-let i = 0
-let cardindex = 1
-
-let _warriors = 10
-let _health = 3
-let _coin = 10
-let _pops = 25
-let _years = 1
-
-const audio = new Audio.Sound()
-const mainaudio = new Audio.Sound()
-
-const seal = { icon: 'sword', level: 0 }
-
-// Game booleans and temp variables
-let inBattle = false
-let _enemycount = 0
-let _currentWarrior = null
-let _currentEnemy = null
-let combatlevel = 0
-let danger = 1
 let _question = ' '
-
-// Card booleans and temp variables
-let duginhp = 0
-let warriorbuff = 0
-let patronage = 0
 
 // weird errors happened when I tried to just have null be the "dead" state so I used this instead
 const deadenemy = { name: 'dead', health: 0, damage: 1, icon: 'skull' }
@@ -142,6 +116,7 @@ const quests = [
 ]
 
 // Defeat screen, if you die this is where you go
+/* 
 class Defeat extends React.Component {
   // Rolls a "dice" to help in adding some chance to the game
   _rollDice () {
@@ -217,127 +192,153 @@ class Defeat extends React.Component {
       </Animatable.View>
     )
   }
-}
+} */
 
 // MAIN GAME SCREEN
 // Contains all the logic and game mechanics of the actual game
-class Home extends React.Component {
+
+interface IProps {
+  world: World
+}
+
+interface IState {
+  world: World
+}
+class Home extends React.Component<IState, IProps> {
   constructor (props) {
     super(props)
     this.state = {
-      coin: 10,
-      pops: 10,
-      health: 25,
-      warriors: 2,
-      enemies: 0,
-      years: 0,
-      modal: false
+      world: this.props.navigation.getParam('world', null)
     }
   }
 
   // Utility methods that help run certain game components and keep track of internal stats
-  _calculateIncome (amount) {
-    _coin += amount
+  _calculateIncome (amount: number) {
+    const world = this.state.world
+    world.coin += amount
+    this.setState({ world })
   }
 
-  _calculateHealth (amount) {
-    if (_health < 25) {
-      _health += amount
+  _calculateHealth (amount: number) {
+    if (this.state.world.health < 25) {
+      this.state.world.health += amount
     }
   }
 
-  _removeHealth (amount) {
-    if (_health - amount > 0) {
-      _health -= amount
+  _removeHealth (amount: number) {
+    const world = this.state.world
+    if (world.health - amount > 0) {
+      world.health -= amount
     } else {
       this.props.navigation.navigate('Defeat')
     }
   }
 
-  _calculateWarriors (amount) {
-    _warriors += amount
+  _calculateWarriors (amount: number) {
+    const world = this.state.world
+    world.warriors += amount
+    this.setState({ world })
   }
 
-  _calculatePeasants (amount) {
-    _pops += amount
+  _calculatePeasants (amount: number) {
+    const world = this.state.world
+    world.pops += amount
+    this.setState({ world })
   }
 
-  _calculateLoot (amount) {
+  _calculateLoot (amount: number) {
     const dice = amount * this._rollDice()
     this._calculateIncome(Math.floor(dice * 0.5))
   }
 
   // Conduct "war" with the enemies and see who wins, whoever runs out of soliders first loses the battle
   _conductBattle () {
-    if (_currentEnemy === deadenemy && _enemycount > 0) {
+    let { currentEnemy, currentWarrior, enemycount, combatlevel, inBattle, warriors, warriorbuff, duginhp } = this.state.world
+    if (currentEnemy === deadenemy && enemycount > 0) {
       if (combatlevel < enemyclasses.length) {
-        _currentEnemy = enemyclasses[combatlevel]
+        currentEnemy = enemyclasses[combatlevel]
       } else {
-        _currentEnemy = enemyclasses[1]
+        currentEnemy = enemyclasses[1]
       }
-    } else if (_enemycount <= 0) {
+    } else if (enemycount <= 0) {
       inBattle = false
-      this._calculateLoot(_enemycount)
-      _enemycount = 0
+      this._calculateLoot(enemycount)
+      enemycount = 0
       return
     }
 
-    if (_currentWarrior === deadenemy && _warriors > 0) {
+    if (currentWarrior === deadenemy && warriors > 0) {
       if (warriorbuff > 0) {
-        _currentWarrior = warriorclasses[1]
+        currentWarrior = warriorclasses[1]
         warriorbuff -= 1
       } else {
-        _currentWarrior = warriorclasses[0]
+        currentWarrior = warriorclasses[0]
       }
-    } else if (_warriors <= 0) {
+    } else if (warriors <= 0) {
       inBattle = false
-      _enemycount = 0
+      enemycount = 0
       this._removeHealth(1)
       return
     }
 
-    if (_currentWarrior.damage * this._rollDice() < _currentEnemy.damage * this._rollDice()) {
+    if (currentWarrior.damage * this._rollDice() < currentEnemy.damage * this._rollDice()) {
       if (duginhp > 0) {
         duginhp -= 1
       } else {
-        _currentWarrior = deadenemy
+        currentWarrior = deadenemy
         this._calculateWarriors(-1)
       }
     } else {
-      _currentEnemy = deadenemy
-      _enemycount -= 1
+      currentEnemy = deadenemy
+      enemycount -= 1
     }
+
+    const world = this.state.world
+    world.enemycount  = enemycount
+    world.currentEnemy = currentEnemy
+    world.currentWarrior = currentWarrior
+    world.combatlevel = combatlevel
+    world.inBattle = inBattle
+    world.warriors = warriors
+    world.warriorbuff = warriorbuff
+    world.duginhp = duginhp
+
+    this.setState({ world })
   }
 
   // If the kingdom is at peace, collect income and increase the population
   _conductPeace () {
     const dice = this._rollDice()
+    const world = this.state.world
 
     if (this._rollInBattleDice() >= 19) {
       Alert.alert('Enemies are approaching sire! To arms!')
-      inBattle = true
-      _enemycount += (this._rollDice() * dice) * danger
+      world.inBattle = true
+      world.enemycount += (this._rollDice() * dice) * world.danger
 
-      if (combatlevel < enemyclasses.length) {
-        _currentEnemy = enemyclasses[combatlevel]
+      if (world.combatlevel < enemyclasses.length) {
+        world.currentEnemy = enemyclasses[combatlevel]
       } else {
-        _currentEnemy = enemyclasses[1]
+        world.currentEnemy = enemyclasses[1]
       }
 
-      if (warriorbuff > 0) {
-        _currentWarrior = warriorclasses[1]
+      if (world.warriorbuff > 0) {
+        world.currentWarrior = warriorclasses[1]
       } else {
-        _currentWarrior = warriorclasses[0]
+        world.currentWarrior = warriorclasses[0]
       }
     } else {
-      this._calculateIncome(Math.floor(0.5 * dice) + patronage)
-      _pops += Math.floor(0.4 * dice)
+      this._calculateIncome(Math.floor(0.5 * dice) + world.patronage)
+      world.pops += Math.floor(0.4 * dice)
     }
+
+    this.setState({ world })
   }
 
-  // Quest system, responsible for determing if a card is unlocked or not
+  // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
-    const question = quests[cardindex - 1]
+    const world = this.state.world
+    const question = quests[world.cardindex - 1]
     const dice = this._rollDice()
 
     if (dice > 3) {
@@ -348,28 +349,33 @@ class Home extends React.Component {
   }
 
   // Processes the response via the user from the quest prompt
-  _processQuestQuestion (state, response) {
+  _processQuestQuestion (response) {
+    const world = this.state.world
     if (response) {
-      if (cardindex < cards.length) {
-        cards[cardindex].unlocked = true
-        cardindex++
-        this._runUI(state, false)
+      if (world.cardindex < cards.length) {
+        cards[world.cardindex].unlocked = true
+        world.cardindex++
+        this.setState({ world })
+        this._runUI(false)
       }
     } else {
-      this._runUI(state, false)
+      this.setState({ world })
+      this._runUI(false)
     }
   }
 
   // If a card is "played" then it will be processed WITHOUT moving the tick forward
   // This way the cards actually will have an effect ingame
-  _conductCardAction (state, card) {
+  _conductCardAction (card) {
+    const world = this.state.world
     switch (card.name) {
       case 'Guardian': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           this._calculateWarriors(5)
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this.setState({ world })
+          this._runUI(false)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -377,11 +383,11 @@ class Home extends React.Component {
         }
       }
       case 'Train': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
-          warriorbuff += 5
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
+          world.warriorbuff += 5
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -832,8 +838,7 @@ class Home extends React.Component {
 const AppNavigator = createStackNavigator(
   {
     Game: Home,
-    NewGameScreen: NewGame,
-    Defeat: Defeat
+    NewGameScreen: NewGame
   },
   {
     initialRouteName: 'NewGameScreen',

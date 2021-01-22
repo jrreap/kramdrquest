@@ -6,6 +6,8 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Audio } from 'expo-av'
 import { styles } from '../core/consts'
 
+import World from '../core/worldTools/World'
+
 import {
   Text,
   View,
@@ -30,8 +32,9 @@ class NewGame extends React.Component {
 
   // Begins the game
   async startGame () {
+    const world = new World()
     await this.state.backgroundAudio.stopAsync()
-    this.props.startCallback()
+    this.props.navigation.navigate('Game', { world })
   }
 
   render () {

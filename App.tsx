@@ -197,15 +197,17 @@ class Defeat extends React.Component {
 // MAIN GAME SCREEN
 // Contains all the logic and game mechanics of the actual game
 
-interface IProps {
+interface IState {
   world: World,
-  modal: boolean
+  modal: boolean,
+  navigation: unknown
 }
 
-interface IState {
-  world: World
+interface IProps {
+  world: World,
+  navigation: unknown
 }
-class Home extends React.Component<IState, IProps> {
+class Home extends React.Component<IProps, IState> {
   constructor (props) {
     super(props)
     this.state = {
@@ -350,7 +352,7 @@ class Home extends React.Component<IState, IProps> {
   }
 
   // Processes the response via the user from the quest prompt
-  _processQuestQuestion (response) {
+  _processQuestQuestion (response: boolean) {
     const world = this.state.world
     if (response) {
       if (world.cardindex < cards.length) {
@@ -578,6 +580,7 @@ class Home extends React.Component<IState, IProps> {
 
   // Returns the seal of the kingdom based on the level and game
   _returnKingdomSeal () {
+    const { seal } = this.state.world
     switch (seal.level) {
       case (0): {
         return (
@@ -666,14 +669,13 @@ class Home extends React.Component<IState, IProps> {
 
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
-    const spacer = <View style={styles.spacer} />
     return cards
       .map((item) => {
         if (item.unlocked && item.popcost > 0) {
           return (
             // This should probably be in another class/component buuuuut
             <View>
-              <TouchableOpacity onPress={(state) => this._conductCardAction(state, item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -693,7 +695,7 @@ class Home extends React.Component<IState, IProps> {
         } else if (item.unlocked) {
           return (
             <View>
-              <TouchableOpacity onPress={(state) => this._conductCardAction(state, item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -727,9 +729,11 @@ class Home extends React.Component<IState, IProps> {
 
   render () {
     const draggableRange = {
-      top: deviceheight / 2,
+      top: Dimensions.get('window').height / 2,
       bottom: 50
     }
+
+    const { health, coin, warriors, pops, years } = this.state.world
 
     return (
 
@@ -737,19 +741,19 @@ class Home extends React.Component<IState, IProps> {
 
         <View style={styles.toolbar}>
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><Ionicons name='md-heart' size={32} color='red' />{_health}</Text>
+            <Text style={styles.counter}><Ionicons name='md-heart' size={32} color='red' />{health}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><MaterialCommunityIcons name='coin' size={32} color='gold' /> {_coin}</Text>
+            <Text style={styles.counter}><MaterialCommunityIcons name='coin' size={32} color='gold' /> {coin}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><MaterialCommunityIcons name='shield-half-full' size={32} color='black' /> {_warriors}</Text>
+            <Text style={styles.counter}><MaterialCommunityIcons name='shield-half-full' size={32} color='black' /> {warriors}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><Ionicons name='md-person' size={32} color='black' /> {_pops}</Text>
+            <Text style={styles.counter}><Ionicons name='md-person' size={32} color='black' /> {pops}</Text>
           </View>
         </View>
 
@@ -765,7 +769,7 @@ class Home extends React.Component<IState, IProps> {
               <View style={{ flexDirection: 'row' }}>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={(state) => this._processQuestQuestion(state, true)}
+                    onPress={() => this._processQuestQuestion(true)}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>
@@ -775,7 +779,7 @@ class Home extends React.Component<IState, IProps> {
                 </View>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={(state) => this._processQuestQuestion(state, false)}
+                    onPress={() => this._processQuestQuestion(false)}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>
@@ -795,13 +799,13 @@ class Home extends React.Component<IState, IProps> {
           <Text style={styles.header}>
             KramdrQuest
           </Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 5 }}>Years In Power: {_years}</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 5 }}>Years In Power: {years}</Text>
 
           {this._returnCombatMenu()}
 
           <View style={styles.toolbarbutton}>
             <TouchableHighlight
-              onPress={state => this._onPressButton(state)}
+              onPress={this._onPressButton}
               underlayColor='#c4c4c4'
             >
               <View style={styles.button}>

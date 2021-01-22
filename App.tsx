@@ -198,7 +198,8 @@ class Defeat extends React.Component {
 // Contains all the logic and game mechanics of the actual game
 
 interface IProps {
-  world: World
+  world: World,
+  modal: boolean
 }
 
 interface IState {
@@ -317,7 +318,7 @@ class Home extends React.Component<IState, IProps> {
       world.enemycount += (this._rollDice() * dice) * world.danger
 
       if (world.combatlevel < enemyclasses.length) {
-        world.currentEnemy = enemyclasses[combatlevel]
+        world.currentEnemy = enemyclasses[world.combatlevel]
       } else {
         world.currentEnemy = enemyclasses[1]
       }
@@ -355,12 +356,10 @@ class Home extends React.Component<IState, IProps> {
       if (world.cardindex < cards.length) {
         cards[world.cardindex].unlocked = true
         world.cardindex++
-        this.setState({ world })
-        this._runUI(false)
+        this._runUI(false, world)
       }
     } else {
-      this.setState({ world })
-      this._runUI(false)
+      this._runUI(false, world)
     }
   }
 
@@ -374,8 +373,7 @@ class Home extends React.Component<IState, IProps> {
           this._calculateWarriors(5)
           world.coin -= card.cost
           world.pops -= card.popcost
-          this.setState({ world })
-          this._runUI(false)
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -387,7 +385,7 @@ class Home extends React.Component<IState, IProps> {
           world.warriorbuff += 5
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false)
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -395,11 +393,11 @@ class Home extends React.Component<IState, IProps> {
         }
       }
       case 'Moo Mula': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           this._calculateIncome(this._rollDice() * 2)
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -407,10 +405,10 @@ class Home extends React.Component<IState, IProps> {
         }
       }
       case 'Dig In': {
-        if (_coin - card.cost >= 0) {
-          _coin -= card.cost
-          duginhp += 5
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0) {
+          world.coin -= card.cost
+          world.duginhp += 5
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -418,11 +416,11 @@ class Home extends React.Component<IState, IProps> {
         }
       }
       case 'Patronage': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
-          patronage += 1
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
+          world.patronage += 1
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -430,17 +428,17 @@ class Home extends React.Component<IState, IProps> {
         }
       }
       case 'Arrow Storm': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           const dice = Math.floor(this._rollDice())
-          if (_enemycount - dice >= 0) {
-            _enemycount -= dice
+          if (world.enemycount - dice >= 0) {
+            world.enemycount -= dice
           } else {
-            _enemycount = 0
+            world.enemycount = 0
           }
 
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -449,14 +447,14 @@ class Home extends React.Component<IState, IProps> {
       }
       // Straight up the most OP card
       case 'Kramdr': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           const dice = Math.floor(this._rollDice())
           this._calculateIncome(dice * 4)
           this._calculatePeasants(dice * 10)
-          _enemycount = 0
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.enemycount = 0
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -477,66 +475,68 @@ class Home extends React.Component<IState, IProps> {
   }
 
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
-  _runTick (state) {
-    if (inBattle) {
+  _runTick () {
+    if (this.state.world.inBattle) {
       this._conductBattle()
     } else {
       this._conductPeace()
     }
 
-    _years += 1
+    const world = this.state.world
+    world.years += 1
 
     // Increases the seal level every 100 years
-    if (_years % 100 === 0) {
-      if (seal.level < 6) {
-        seal.level++
+    if (world.years % 100 === 0) {
+      if (world.seal.level < 6) {
+        world.seal.level++
       }
     }
 
     // Increases the difficulty of combat every 200 years
-    if (_years % 200 === 0) {
-      if (combatlevel < enemyclasses.length) {
-        combatlevel += 1
-        danger += 1
+    if (world.years % 200 === 0) {
+      if (world.combatlevel < enemyclasses.length) {
+        world.combatlevel += 1
+        world.danger += 1
         Alert.alert('Sire! The enemies have gotten stronger... we better train better warriors!')
       }
     }
 
     // Runs a quest every 50 years
-    if (_years % 50 === 0) {
-      if (cardindex < cards.length) {
+    if (world.years % 50 === 0) {
+      if (world.cardindex < cards.length) {
         _question = this._createQuestQuestion()
-        this._runUI(state, true)
+        this._runUI(true, world)
       }
     }
 
     // Refresh the screen now that everything has been compiled for the next tick
-    this.setState(() => ({ warriors: _warriors, coin: _coin, health: _health, pops: _pops, enemies: _enemycount, years: _years }))
+    this.setState({ world })
   }
 
   // Runs a state update, but skips the tick. Used for UI updates before executing the next turn
-  _runUI (state, modal) {
-    this.setState(() => ({ warriors: _warriors, coin: _coin, health: _health, pops: _pops, enemies: _enemycount, years: _years, modal: modal }))
+  _runUI (modal: boolean, world: World) {
+    this.setState({ world, modal: modal })
   }
 
   // Execute a tick
-  _onPressButton (state) {
-    this._runTick(state)
+  _onPressButton () {
+    this._runTick()
   }
 
   // Returns the UI for combat
   _returnCombatMenu () {
+    const { inBattle, duginhp, enemycount, currentEnemy, currentWarrior} = this.state.world
     if (inBattle) {
       if (duginhp > 1) {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
               <MaterialCommunityIcons name='wall' size={32} />
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -544,12 +544,12 @@ class Home extends React.Component<IState, IProps> {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
               <MaterialCommunityIcons color='red' name='wall' size={32} />
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -557,11 +557,11 @@ class Home extends React.Component<IState, IProps> {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -570,7 +570,7 @@ class Home extends React.Component<IState, IProps> {
       return (
         <View style={styles.combatcontainer}>
           <MaterialCommunityIcons name='flower-tulip' color='#b197fc' size={32} />
-          <Text style={styles.paragraph}>Our Kingom is at Peace Sire! Your income can now be collected and peasants recruited.</Text>
+          <Text style={styles.paragraph}>Our Kingdom is at Peace Sire! Your income can now be collected and peasants recruited.</Text>
         </View>
       )
     }

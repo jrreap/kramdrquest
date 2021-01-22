@@ -21,7 +21,7 @@ class NewGame extends React.Component {
     this.state = {}
   }
   async startBackgroundAudio () {
-    const { sound } = await Audio.Sound.createAsync(require('./assets/land.mp3'))
+    const { sound } = await Audio.Sound.createAsync(require('../assets/land.mp3'))
     this.setState({ backgroundAudio: sound })
     sound.playAsync()
   }

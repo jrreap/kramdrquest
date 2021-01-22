@@ -805,7 +805,7 @@ class Home extends React.Component<IProps, IState> {
 
           <View style={styles.toolbarbutton}>
             <TouchableHighlight
-              onPress={this._onPressButton}
+              onPress={() => this._onPressButton()}
               underlayColor='#c4c4c4'
             >
               <View style={styles.button}>

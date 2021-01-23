@@ -2,14 +2,16 @@ import * as React from 'react'
 import {
   Text,
   View,
-  StyleSheet,
   Alert,
   TouchableHighlight,
   TouchableOpacity,
   ScrollView,
-  Dimensions,
-  Modal
+  Modal,
+  Dimensions
 } from 'react-native'
+
+import { styles } from './core/consts'
+import NewGame from './components/NewGame'
 
 /*
           ======= KRAMDRQUEST =======
@@ -36,50 +38,15 @@ import {
 // Word of warning yes I know some of this stuff should be in other components (its react best practices after all)
 // it was simply easier to just keep everything in one file for now so I didn't have to mess with props... so yeah be warned!
 
-// Default expo stuff
-import Constants from 'expo-constants'
-import { Audio } from 'expo-av'
 
 // Additional Packages/Icons via NPM
 import * as Animatable from 'react-native-animatable'
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { createAppContainer, createStackNavigator } from 'react-navigation'
-import { Ionicons, Feather, MaterialCommunityIcons } from '@expo/vector-icons'
+import { createAppContainer, createStackNavigator, NavigationProp } from 'react-navigation'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import World from './core/worldTools/World'
 
-// For reference in sizing the modal
-const devicewidth = Dimensions.get('window').width
-const deviceheight = Dimensions.get('window').height
-
-// Global Variables
-// default stuff, game changes are stored in the state but these are the base
-let i = 0
-let cardindex = 1
-
-let _warriors = 10
-let _health = 3
-let _coin = 10
-let _pops = 25
-let _years = 1
-
-const audio = new Audio.Sound()
-const mainaudio = new Audio.Sound()
-
-const seal = { icon: 'sword', level: 0 }
-
-// Game booleans and temp variables
-let inBattle = false
-let _enemycount = 0
-let _currentWarrior = null
-let _currentEnemy = null
-let _notdead = true
-let combatlevel = 0
-let danger = 1
 let _question = ' '
-
-// Card booleans and temp variables
-let duginhp = 0
-let warriorbuff = 0
-let patronage = 0
 
 // weird errors happened when I tried to just have null be the "dead" state so I used this instead
 const deadenemy = { name: 'dead', health: 0, damage: 1, icon: 'skull' }
@@ -148,132 +115,8 @@ const quests = [
   }
 ]
 
-// Opening Screen, starts the game here
-class NewGame extends React.Component {
-  // Rolls a "dice" to help in adding some chance to the game
-  _rollDice () {
-    return Math.floor((Math.random() * 6) + 1)
-  }
-
-  componentDidMount () {
-    if (i === 0) {
-      this._soundMain()
-    }
-    i++
-  }
-
-  // Loads in and starts the audio playback for the game
-  async _soundMain () {
-    try {
-      await audio.loadAsync(require('./assets/land.mp3'))
-      await audio.playAsync()
-    } catch (error) {
-      console.log(error)
-    }
-
-    try {
-      await mainaudio.loadAsync(require('./assets/bluearcher.mp3'), { isLooping: true })
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-  // Generate the "world" you start in, maybe you'll get a few extra gold or maybe more soilders to defend your kingdom with
-  // For some reason on my phone it would occasionally not run fast enough... probably because of animations so there is a "loading sequence"
-  // to help stall :)
-  _generateWorld () {
-    // Make sure everything is set to default
-    _warriors = 10
-    _health = 3
-    _coin = 10
-    _pops = 25
-    _years = 1
-
-    inBattle = false
-    _enemycount = 0
-    _currentWarrior = null
-    _currentEnemy = null
-    _notdead = true
-
-    // Create the kingdom seal
-    switch (this._rollDice()) {
-      case (1): {
-        seal.icon = 'sword'
-        break
-      }
-      case (2): {
-        seal.icon = 'cupcake'
-        break
-      }
-      case (3): {
-        seal.icon = 'ship-wheel'
-        break
-      }
-      case (4): {
-        seal.icon = 'ubuntu'
-        break
-      }
-      case (5): {
-        seal.icon = 'cat'
-        break
-      }
-      case (6): {
-        seal.icon = 'castle'
-        break
-      }
-    }
-
-    // Now to vary the world a bit for different play styles
-    _coin += this._rollDice() * this._rollDice()
-    _warriors += Math.floor(this._rollDice() * 1.5)
-    _pops += Math.floor(this._rollDice() * 0.8)
-  }
-
-  // Begins the game
-  _pressButton () {
-    audio.stopAsync()
-
-    mainaudio.playAsync()
-
-    this.props.navigation.navigate('Game')
-  }
-
-  render () {
-    this._generateWorld()
-
-    return (
-      <Animatable.View style={styles.container} animation='fadeIn' duration={1000} iterationCount={1} easing='ease-in'>
-        <View style={styles.innercontainer}>
-          <MaterialCommunityIcons name='sword-cross' size={65} />
-          <Text style={styles.title}>
-            KramdrQuest
-          </Text>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', paddingBottom: 30 }}>
-            Developed by Jaydon Reap 2019
-          </Text>
-          <Animatable.Text animation='fadeInLeft' delay={1000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>The pocket-sized adventure game</Animatable.Text>
-          <Animatable.Text animation='fadeInRight' delay={2000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Beginning generation...</Animatable.Text>
-          <Animatable.Text animation='fadeInLeft' delay={4000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Rallying the soldiers...</Animatable.Text>
-          <Animatable.Text animation='fadeInRight' delay={6000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Collecting taxes...</Animatable.Text>
-          <Animatable.Text animation='fadeInRight' delay={8000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Drawing seal...</Animatable.Text>
-          <Animatable.Text animation='fadeInLeft' delay={10000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Done!</Animatable.Text>
-
-          <TouchableHighlight
-            onPress={() => this._pressButton()}
-            underlayColor='#c4c4c4'
-          >
-            <Animatable.View animation='fadeInUp' delay={11000} style={styles.button}>
-              <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', paddingLeft: 5 }}>Begin</Text>
-            </Animatable.View>
-          </TouchableHighlight>
-
-        </View>
-      </Animatable.View>
-    )
-  }
-}
-
 // Defeat screen, if you die this is where you go
+/* 
 class Defeat extends React.Component {
   // Rolls a "dice" to help in adding some chance to the game
   _rollDice () {
@@ -349,127 +192,156 @@ class Defeat extends React.Component {
       </Animatable.View>
     )
   }
-}
+} */
 
 // MAIN GAME SCREEN
 // Contains all the logic and game mechanics of the actual game
-class Home extends React.Component {
+
+interface IState {
+  world: World,
+  modal: boolean,
+  navigation: unknown
+}
+
+interface IProps {
+  world: World,
+  navigation: unknown
+}
+class Home extends React.Component<IProps, IState> {
   constructor (props) {
     super(props)
     this.state = {
-      coin: 10,
-      pops: 10,
-      health: 25,
-      warriors: 2,
-      enemies: 0,
-      years: 0,
-      modal: false
+      world: this.props.navigation.getParam('world', null)
     }
   }
 
   // Utility methods that help run certain game components and keep track of internal stats
-  _calculateIncome (amount) {
-    _coin += amount
+  _calculateIncome (amount: number) {
+    const world = this.state.world
+    world.coin += amount
+    this.setState({ world })
   }
 
-  _calculateHealth (amount) {
-    if (_health < 25) {
-      _health += amount
+  _calculateHealth (amount: number) {
+    if (this.state.world.health < 25) {
+      this.state.world.health += amount
     }
   }
 
-  _removeHealth (amount) {
-    if (_health - amount > 0) {
-      _health -= amount
+  _removeHealth (amount: number) {
+    const world = this.state.world
+    if (world.health - amount > 0) {
+      world.health -= amount
     } else {
       this.props.navigation.navigate('Defeat')
     }
   }
 
-  _calculateWarriors (amount) {
-    _warriors += amount
+  _calculateWarriors (amount: number) {
+    const world = this.state.world
+    world.warriors += amount
+    this.setState({ world })
   }
 
-  _calculatePeasants (amount) {
-    _pops += amount
+  _calculatePeasants (amount: number) {
+    const world = this.state.world
+    world.pops += amount
+    this.setState({ world })
   }
 
-  _calculateLoot (amount) {
+  _calculateLoot (amount: number) {
     const dice = amount * this._rollDice()
     this._calculateIncome(Math.floor(dice * 0.5))
   }
 
   // Conduct "war" with the enemies and see who wins, whoever runs out of soliders first loses the battle
   _conductBattle () {
-    if (_currentEnemy === deadenemy && _enemycount > 0) {
+    let { currentEnemy, currentWarrior, enemycount, combatlevel, inBattle, warriors, warriorbuff, duginhp } = this.state.world
+    if (currentEnemy === deadenemy && enemycount > 0) {
       if (combatlevel < enemyclasses.length) {
-        _currentEnemy = enemyclasses[combatlevel]
+        currentEnemy = enemyclasses[combatlevel]
       } else {
-        _currentEnemy = enemyclasses[1]
+        currentEnemy = enemyclasses[1]
       }
-    } else if (_enemycount <= 0) {
+    } else if (enemycount <= 0) {
       inBattle = false
-      this._calculateLoot(_enemycount)
-      _enemycount = 0
+      this._calculateLoot(enemycount)
+      enemycount = 0
       return
     }
 
-    if (_currentWarrior === deadenemy && _warriors > 0) {
+    if (currentWarrior === deadenemy && warriors > 0) {
       if (warriorbuff > 0) {
-        _currentWarrior = warriorclasses[1]
+        currentWarrior = warriorclasses[1]
         warriorbuff -= 1
       } else {
-        _currentWarrior = warriorclasses[0]
+        currentWarrior = warriorclasses[0]
       }
-    } else if (_warriors <= 0) {
+    } else if (warriors <= 0) {
       inBattle = false
-      _enemycount = 0
+      enemycount = 0
       this._removeHealth(1)
       return
     }
 
-    if (_currentWarrior.damage * this._rollDice() < _currentEnemy.damage * this._rollDice()) {
+    if (currentWarrior.damage * this._rollDice() < currentEnemy.damage * this._rollDice()) {
       if (duginhp > 0) {
         duginhp -= 1
       } else {
-        _currentWarrior = deadenemy
+        currentWarrior = deadenemy
         this._calculateWarriors(-1)
       }
     } else {
-      _currentEnemy = deadenemy
-      _enemycount -= 1
+      currentEnemy = deadenemy
+      enemycount -= 1
     }
+
+    const world = this.state.world
+    world.enemycount  = enemycount
+    world.currentEnemy = currentEnemy
+    world.currentWarrior = currentWarrior
+    world.combatlevel = combatlevel
+    world.inBattle = inBattle
+    world.warriors = warriors
+    world.warriorbuff = warriorbuff
+    world.duginhp = duginhp
+
+    this.setState({ world })
   }
 
   // If the kingdom is at peace, collect income and increase the population
   _conductPeace () {
     const dice = this._rollDice()
+    const world = this.state.world
 
     if (this._rollInBattleDice() >= 19) {
       Alert.alert('Enemies are approaching sire! To arms!')
-      inBattle = true
-      _enemycount += (this._rollDice() * dice) * danger
+      world.inBattle = true
+      world.enemycount += (this._rollDice() * dice) * world.danger
 
-      if (combatlevel < enemyclasses.length) {
-        _currentEnemy = enemyclasses[combatlevel]
+      if (world.combatlevel < enemyclasses.length) {
+        world.currentEnemy = enemyclasses[world.combatlevel]
       } else {
-        _currentEnemy = enemyclasses[1]
+        world.currentEnemy = enemyclasses[1]
       }
 
-      if (warriorbuff > 0) {
-        _currentWarrior = warriorclasses[1]
+      if (world.warriorbuff > 0) {
+        world.currentWarrior = warriorclasses[1]
       } else {
-        _currentWarrior = warriorclasses[0]
+        world.currentWarrior = warriorclasses[0]
       }
     } else {
-      this._calculateIncome(Math.floor(0.5 * dice) + patronage)
-      _pops += Math.floor(0.4 * dice)
+      this._calculateIncome(Math.floor(0.5 * dice) + world.patronage)
+      world.pops += Math.floor(0.4 * dice)
     }
+
+    this.setState({ world })
   }
 
-  // Quest system, responsible for determing if a card is unlocked or not
+  // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
-    const question = quests[cardindex - 1]
+    const world = this.state.world
+    const question = quests[world.cardindex - 1]
     const dice = this._rollDice()
 
     if (dice > 3) {
@@ -480,28 +352,30 @@ class Home extends React.Component {
   }
 
   // Processes the response via the user from the quest prompt
-  _processQuestQuestion (state, response) {
+  _processQuestQuestion (response: boolean) {
+    const world = this.state.world
     if (response) {
-      if (cardindex < cards.length) {
-        cards[cardindex].unlocked = true
-        cardindex++
-        this._runUI(state, false)
+      if (world.cardindex < cards.length) {
+        cards[world.cardindex].unlocked = true
+        world.cardindex++
+        this._runUI(false, world)
       }
     } else {
-      this._runUI(state, false)
+      this._runUI(false, world)
     }
   }
 
   // If a card is "played" then it will be processed WITHOUT moving the tick forward
   // This way the cards actually will have an effect ingame
-  _conductCardAction (state, card) {
+  _conductCardAction (card) {
+    const world = this.state.world
     switch (card.name) {
       case 'Guardian': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           this._calculateWarriors(5)
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -509,11 +383,11 @@ class Home extends React.Component {
         }
       }
       case 'Train': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
-          warriorbuff += 5
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
+          world.warriorbuff += 5
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -521,11 +395,11 @@ class Home extends React.Component {
         }
       }
       case 'Moo Mula': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           this._calculateIncome(this._rollDice() * 2)
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -533,10 +407,10 @@ class Home extends React.Component {
         }
       }
       case 'Dig In': {
-        if (_coin - card.cost >= 0) {
-          _coin -= card.cost
-          duginhp += 5
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0) {
+          world.coin -= card.cost
+          world.duginhp += 5
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -544,11 +418,11 @@ class Home extends React.Component {
         }
       }
       case 'Patronage': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
-          patronage += 1
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
+          world.patronage += 1
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -556,17 +430,17 @@ class Home extends React.Component {
         }
       }
       case 'Arrow Storm': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           const dice = Math.floor(this._rollDice())
-          if (_enemycount - dice >= 0) {
-            _enemycount -= dice
+          if (world.enemycount - dice >= 0) {
+            world.enemycount -= dice
           } else {
-            _enemycount = 0
+            world.enemycount = 0
           }
 
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -575,14 +449,14 @@ class Home extends React.Component {
       }
       // Straight up the most OP card
       case 'Kramdr': {
-        if (_coin - card.cost >= 0 && _pops - card.popcost >= 0) {
+        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           const dice = Math.floor(this._rollDice())
           this._calculateIncome(dice * 4)
           this._calculatePeasants(dice * 10)
-          _enemycount = 0
-          _coin -= card.cost
-          _pops -= card.popcost
-          this._runUI(state, false)
+          world.enemycount = 0
+          world.coin -= card.cost
+          world.pops -= card.popcost
+          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -603,66 +477,68 @@ class Home extends React.Component {
   }
 
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
-  _runTick (state) {
-    if (inBattle) {
+  _runTick () {
+    if (this.state.world.inBattle) {
       this._conductBattle()
     } else {
       this._conductPeace()
     }
 
-    _years += 1
+    const world = this.state.world
+    world.years += 1
 
     // Increases the seal level every 100 years
-    if (_years % 100 === 0) {
-      if (seal.level < 6) {
-        seal.level++
+    if (world.years % 100 === 0) {
+      if (world.seal.level < 6) {
+        world.seal.level++
       }
     }
 
     // Increases the difficulty of combat every 200 years
-    if (_years % 200 === 0) {
-      if (combatlevel < enemyclasses.length) {
-        combatlevel += 1
-        danger += 1
+    if (world.years % 200 === 0) {
+      if (world.combatlevel < enemyclasses.length) {
+        world.combatlevel += 1
+        world.danger += 1
         Alert.alert('Sire! The enemies have gotten stronger... we better train better warriors!')
       }
     }
 
     // Runs a quest every 50 years
-    if (_years % 50 === 0) {
-      if (cardindex < cards.length) {
+    if (world.years % 50 === 0) {
+      if (world.cardindex < cards.length) {
         _question = this._createQuestQuestion()
-        this._runUI(state, true)
+        this._runUI(true, world)
       }
     }
 
     // Refresh the screen now that everything has been compiled for the next tick
-    this.setState(() => ({ warriors: _warriors, coin: _coin, health: _health, pops: _pops, enemies: _enemycount, years: _years }))
+    this.setState({ world })
   }
 
   // Runs a state update, but skips the tick. Used for UI updates before executing the next turn
-  _runUI (state, modal) {
-    this.setState(() => ({ warriors: _warriors, coin: _coin, health: _health, pops: _pops, enemies: _enemycount, years: _years, modal: modal }))
+  _runUI (modal: boolean, world: World) {
+    this.setState({ world, modal: modal })
   }
 
   // Execute a tick
-  _onPressButton (state) {
-    this._runTick(state)
+  _onPressButton () {
+    this._runTick()
   }
 
   // Returns the UI for combat
   _returnCombatMenu () {
+    const { inBattle, duginhp, enemycount, currentEnemy, currentWarrior} = this.state.world
     if (inBattle) {
       if (duginhp > 1) {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
               <MaterialCommunityIcons name='wall' size={32} />
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -670,12 +546,12 @@ class Home extends React.Component {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
               <MaterialCommunityIcons color='red' name='wall' size={32} />
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -683,11 +559,11 @@ class Home extends React.Component {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {_enemycount}</Text>
+            <Text>Enemy Strength: {enemycount}</Text>
             <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={_currentEnemy.icon} size={32} />
+              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
-              <MaterialCommunityIcons name={_currentWarrior.icon} size={32} />
+              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
             </View>
           </View>
         )
@@ -696,7 +572,7 @@ class Home extends React.Component {
       return (
         <View style={styles.combatcontainer}>
           <MaterialCommunityIcons name='flower-tulip' color='#b197fc' size={32} />
-          <Text style={styles.paragraph}>Our Kingom is at Peace Sire! Your income can now be collected and peasants recruited.</Text>
+          <Text style={styles.paragraph}>Our Kingdom is at Peace Sire! Your income can now be collected and peasants recruited.</Text>
         </View>
       )
     }
@@ -704,6 +580,7 @@ class Home extends React.Component {
 
   // Returns the seal of the kingdom based on the level and game
   _returnKingdomSeal () {
+    const { seal } = this.state.world
     switch (seal.level) {
       case (0): {
         return (
@@ -792,14 +669,13 @@ class Home extends React.Component {
 
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
-    const spacer = <View style={styles.spacer} />
     return cards
       .map((item) => {
         if (item.unlocked && item.popcost > 0) {
           return (
             // This should probably be in another class/component buuuuut
             <View>
-              <TouchableOpacity onPress={(state) => this._conductCardAction(state, item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -819,7 +695,7 @@ class Home extends React.Component {
         } else if (item.unlocked) {
           return (
             <View>
-              <TouchableOpacity onPress={(state) => this._conductCardAction(state, item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -853,9 +729,11 @@ class Home extends React.Component {
 
   render () {
     const draggableRange = {
-      top: deviceheight / 2,
+      top: Dimensions.get('window').height / 2,
       bottom: 50
     }
+
+    const { health, coin, warriors, pops, years } = this.state.world
 
     return (
 
@@ -863,19 +741,19 @@ class Home extends React.Component {
 
         <View style={styles.toolbar}>
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><Ionicons name='md-heart' size={32} color='red' />{_health}</Text>
+            <Text style={styles.counter}><Ionicons name='md-heart' size={32} color='red' />{health}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><MaterialCommunityIcons name='coin' size={32} color='gold' /> {_coin}</Text>
+            <Text style={styles.counter}><MaterialCommunityIcons name='coin' size={32} color='gold' /> {coin}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><MaterialCommunityIcons name='shield-half-full' size={32} color='black' /> {_warriors}</Text>
+            <Text style={styles.counter}><MaterialCommunityIcons name='shield-half-full' size={32} color='black' /> {warriors}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><Ionicons name='md-person' size={32} color='black' /> {_pops}</Text>
+            <Text style={styles.counter}><Ionicons name='md-person' size={32} color='black' /> {pops}</Text>
           </View>
         </View>
 
@@ -891,7 +769,7 @@ class Home extends React.Component {
               <View style={{ flexDirection: 'row' }}>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={(state) => this._processQuestQuestion(state, true)}
+                    onPress={() => this._processQuestQuestion(true)}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>
@@ -901,7 +779,7 @@ class Home extends React.Component {
                 </View>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={(state) => this._processQuestQuestion(state, false)}
+                    onPress={() => this._processQuestQuestion(false)}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>
@@ -921,13 +799,13 @@ class Home extends React.Component {
           <Text style={styles.header}>
             KramdrQuest
           </Text>
-          <Text style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 5 }}>Years In Power: {_years}</Text>
+          <Text style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 5 }}>Years In Power: {years}</Text>
 
           {this._returnCombatMenu()}
 
           <View style={styles.toolbarbutton}>
             <TouchableHighlight
-              onPress={state => this._onPressButton(state)}
+              onPress={() => this._onPressButton()}
               underlayColor='#c4c4c4'
             >
               <View style={styles.button}>
@@ -960,119 +838,11 @@ class Home extends React.Component {
   }
 }
 
-// All CSS styles
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: Constants.statusBarHeight
-  },
-  popupcontainer: {
-    flex: 1,
-    paddingTop: Constants.statusBarHeight,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 5
-  },
-  popupinnercontainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: devicewidth - 40,
-    borderRadius: 10,
-    backgroundColor: '#c4c4c4'
-  },
-  cardcontainer: {
-    flex: 1,
-    padding: 10
-  },
-  combatcontainer: {
-    padding: 10,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  combatinnercontainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'row'
-  },
-  panel: {
-    flex: 1,
-    backgroundColor: 'white',
-    position: 'relative'
-  },
-  panelHeader: {
-    height: 50,
-    backgroundColor: '#b197fc',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  innercontainer: {
-    flex: 10,
-    justifyContent: 'center',
-    backgroundColor: '#ecf0f1',
-    alignItems: 'center'
-  },
-  carddeck: {
-  },
-  card: {
-    width: 120,
-    height: 170,
-    backgroundColor: '#c1c1c1',
-    borderRadius: 10,
-    justifyContent: 'center',
-    textAlign: 'center'
-  },
-  spacer: {
-    width: 15
-  },
-  toolbar: {
-    flex: 1,
-    justifyContent: 'center',
-    backgroundColor: '#c4c4c4',
-    borderColor: 'black',
-    flexDirection: 'row'
-  },
-  toolbarbutton: {
-    justifyContent: 'center',
-    padding: 10
-  },
-  paragraph: {
-    margin: 24,
-    fontSize: 18,
-    textAlign: 'center'
-  },
-  header: {
-    margin: 24,
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    textAlign: 'center'
-  },
-  counter: {
-    fontSize: 30
-  },
-  button: {
-    width: 120,
-    height: 45,
-    backgroundColor: '#4286f4',
-    padding: 5,
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignContent: 'center',
-    textAlign: 'center'
-  }
-})
-
 // SCREEN CONTROLLER/APP OUTPUT
 const AppNavigator = createStackNavigator(
   {
     Game: Home,
-    NewGameScreen: NewGame,
-    Defeat: Defeat
+    NewGameScreen: NewGame
   },
   {
     initialRouteName: 'NewGameScreen',

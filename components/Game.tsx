@@ -12,7 +12,7 @@ import {
 
 import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { GameProps } from '../types'
 import World from '../core/worldTools/World'
 
@@ -519,7 +519,7 @@ class Game extends React.Component<GameProps, IState> {
                 </View>
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <MaterialCommunityIcons name='coin' color='gold' size={32} />
+                <FontAwesome5 name='coins' color='gold' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.cost}</Text>
                 <Ionicons style={{ paddingLeft: 5 }} name='md-person' color='black' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.popcost}</Text>
@@ -539,7 +539,7 @@ class Game extends React.Component<GameProps, IState> {
                 </View>
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <MaterialCommunityIcons name='coin' color='gold' size={32} />
+                <FontAwesome5 name='coins' color='gold' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.cost}</Text>
               </View>
             </View>
@@ -579,7 +579,7 @@ class Game extends React.Component<GameProps, IState> {
           </View>
 
           <View style={styles.toolbarbutton}>
-            <Text style={styles.counter}><MaterialCommunityIcons name='coin' size={32} color='gold' /> {coin}</Text>
+            <Text style={styles.counter}><FontAwesome5 name='coins' size={32} color='gold' /> {coin}</Text>
           </View>
 
           <View style={styles.toolbarbutton}>

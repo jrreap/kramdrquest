@@ -34,7 +34,7 @@ class NewGame extends React.Component {
   async startGame () {
     const world = new World()
     await this.state.backgroundAudio.stopAsync()
-    this.props.navigation.navigate('Game', { world })
+    this.props.navigation.push('Game', { world })
   }
 
   render () {

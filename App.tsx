@@ -1,19 +1,28 @@
+import * as React from 'react'
+
 import NewGame from './components/NewGame'
 import Defeat from './components/Defeat'
 import Game from './components/Game'
-import { createAppContainer, createStackNavigator } from 'react-navigation'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
 
-const AppNavigator = createStackNavigator(
-  {
-    Game: Game,
-    NewGame: NewGame,
-    Defeat: Defeat
-  },
-  {
-    initialRouteName: 'NewGame',
-    headerMode: 'none'
-  }
-)
 
 // Export the entry point for React Native
-export default createAppContainer(AppNavigator)
+
+const Stack = createStackNavigator()
+
+export default function App () {
+  const screenOptions={
+    headerShown: false
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName='NewGame'>
+        <Stack.Screen name='NewGame' component={NewGame} options={screenOptions} />
+        <Stack.Screen name='Game' component={Game} options={screenOptions} />
+        <Stack.Screen name='Defeat' component={Defeat} options={screenOptions} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
+}

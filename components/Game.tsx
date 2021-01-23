@@ -11,10 +11,7 @@ import {
 } from 'react-native'
 
 import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
-import NewGame from './NewGame'
-import Defeat from './Defeat'
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { createAppContainer, createStackNavigator } from 'react-navigation'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import World from '../core/worldTools/World'
 
@@ -51,13 +48,14 @@ interface IState {
 
 interface IProps {
   world: World,
-  navigation: unknown
+  navigation: unknown,
+  route: unknown
 }
 class Game extends React.Component<IProps, IState> {
   constructor (props) {
     super(props)
     // Fetch the world passed in from the generation
-    const world = this.props.navigation.getParam('world', null)
+    const world = this.props.route.params.world
 
     // Expand this world into state so we have the entire class ready to go
     this.state = {
@@ -85,7 +83,7 @@ class Game extends React.Component<IProps, IState> {
     if (totalHealth - amount > 0) {
       return totalHealth - amount
     } else {
-      this.props.navigation.navigate('Defeat', { years: this.state.world.years})
+      this.props.navigation.push('Defeat', { years: this.state.world.years})
       return 0
     }
   }

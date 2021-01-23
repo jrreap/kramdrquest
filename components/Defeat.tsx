@@ -58,7 +58,7 @@ class Defeat extends React.Component {
             The Kingdom Has Fallen
           </Text>
           <Text style={{ fontSize: 18, fontWeight: 'bold', paddingBottom: 30 }}>
-            Years In Power: {this.props.navigation.getParam('years', 0)}
+            Years In Power: {this.props.route.params.years ?? 0}
           </Text>
           <Animatable.Text animation='fadeInLeft' delay={1000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Cards discovered: {stats[0]}</Animatable.Text>
 
@@ -67,7 +67,7 @@ class Defeat extends React.Component {
           <TouchableHighlight
             style={{ paddingTop: 10 }}
             onPress={() => {
-              this.props.navigation.navigate('NewGame')
+              this.props.navigation.push('NewGame')
             }}
             underlayColor='#c4c4c4'
           >

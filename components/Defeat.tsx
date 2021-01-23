@@ -67,7 +67,7 @@ class Defeat extends React.Component {
           <TouchableHighlight
             style={{ paddingTop: 10 }}
             onPress={() => {
-              this.props.navigation.navigate('NewGameScreen')
+              this.props.navigation.navigate('NewGame')
             }}
             underlayColor='#c4c4c4'
           >

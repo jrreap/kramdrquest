@@ -6,11 +6,11 @@ import { createAppContainer, createStackNavigator } from 'react-navigation'
 const AppNavigator = createStackNavigator(
   {
     Game: Game,
-    NewGameScreen: NewGame,
+    NewGame: NewGame,
     Defeat: Defeat
   },
   {
-    initialRouteName: 'NewGameScreen',
+    initialRouteName: 'NewGame',
     headerMode: 'none'
   }
 )

@@ -42,7 +42,7 @@ import NewGame from './components/NewGame'
 // Additional Packages/Icons via NPM
 import * as Animatable from 'react-native-animatable'
 import SlidingUpPanel from 'rn-sliding-up-panel'
-import { createAppContainer, createStackNavigator, NavigationProp } from 'react-navigation'
+import { createAppContainer, createStackNavigator, NavigationContext } from 'react-navigation'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import World from './core/worldTools/World'
 
@@ -199,8 +199,7 @@ class Defeat extends React.Component {
 
 interface IState {
   world: World,
-  modal: boolean,
-  navigation: unknown
+  modal: boolean
 }
 
 interface IProps {
@@ -210,37 +209,37 @@ interface IProps {
 class Home extends React.Component<IProps, IState> {
   constructor (props) {
     super(props)
+    // Fetch the world passed in from the generation
+    const world = this.props.navigation.getParam('world', null)
+
+    // Expand this world into state so we have the entire class ready to go
     this.state = {
-      world: this.props.navigation.getParam('world', null)
+      world,
+      modal: false
     }
   }
 
   // Utility methods that help run certain game components and keep track of internal stats
-  _calculateIncome (amount: number) {
-    const world = this.state.world
-    world.coin += amount
-    this.setState({ world })
+  _calculateIncome (amount: number, totalCoin: number) {
+    totalCoin += amount
+    return totalCoin
   }
 
   _calculateHealth (amount: number) {
     if (this.state.world.health < 25) {
-      this.state.world.health += amount
+      const world = this.state.world
+      world.health += amount
+      this.setState({ world })
     }
   }
 
-  _removeHealth (amount: number) {
-    const world = this.state.world
-    if (world.health - amount > 0) {
-      world.health -= amount
+  _removeHealth (amount: number, totalHealth: number) {
+    if (totalHealth - amount > 0) {
+      return totalHealth - amount
     } else {
       this.props.navigation.navigate('Defeat')
+      return 0
     }
-  }
-
-  _calculateWarriors (amount: number) {
-    const world = this.state.world
-    world.warriors += amount
-    this.setState({ world })
   }
 
   _calculatePeasants (amount: number) {
@@ -249,62 +248,55 @@ class Home extends React.Component<IProps, IState> {
     this.setState({ world })
   }
 
-  _calculateLoot (amount: number) {
+  _calculateLoot (amount: number, totalCoin: number) {
     const dice = amount * this._rollDice()
-    this._calculateIncome(Math.floor(dice * 0.5))
+    return this._calculateIncome(Math.floor(dice * 0.5), totalCoin)
   }
 
   // Conduct "war" with the enemies and see who wins, whoever runs out of soliders first loses the battle
   _conductBattle () {
-    let { currentEnemy, currentWarrior, enemycount, combatlevel, inBattle, warriors, warriorbuff, duginhp } = this.state.world
-    if (currentEnemy === deadenemy && enemycount > 0) {
-      if (combatlevel < enemyclasses.length) {
-        currentEnemy = enemyclasses[combatlevel]
+    const world = this.state.world
+
+    if (world.currentEnemy === deadenemy && world.enemycount > 0) {
+      if (world.combatlevel < enemyclasses.length) {
+        world.currentEnemy = enemyclasses[world.combatlevel]
       } else {
-        currentEnemy = enemyclasses[1]
+        world.currentEnemy = enemyclasses[1]
       }
-    } else if (enemycount <= 0) {
-      inBattle = false
-      this._calculateLoot(enemycount)
-      enemycount = 0
+    } else if (world.enemycount <= 0) {
+      world.inBattle = false
+      world.coin = this._calculateLoot(world.enemycount, world.coin)
+      world.enemycount = 0
+      this.setState({ world })
       return
     }
 
-    if (currentWarrior === deadenemy && warriors > 0) {
-      if (warriorbuff > 0) {
-        currentWarrior = warriorclasses[1]
-        warriorbuff -= 1
+    if (world.currentWarrior === deadenemy && world.warriors > 0) {
+      if (world.warriorbuff > 0) {
+        world.currentWarrior = warriorclasses[1]
+        world.warriorbuff -= 1
       } else {
-        currentWarrior = warriorclasses[0]
+        world.currentWarrior = warriorclasses[0]
       }
-    } else if (warriors <= 0) {
-      inBattle = false
-      enemycount = 0
-      this._removeHealth(1)
+    } else if (world.warriors <= 0) {
+      world.inBattle = false
+      world.enemycount = 0
+      world.health = this._removeHealth(1, world.health)
+      this.setState({ world })
       return
     }
 
-    if (currentWarrior.damage * this._rollDice() < currentEnemy.damage * this._rollDice()) {
-      if (duginhp > 0) {
-        duginhp -= 1
+    if (world.currentWarrior.damage * this._rollDice() < world.currentEnemy.damage * this._rollDice()) {
+      if (world.duginhp > 0) {
+        world.duginhp -= 1
       } else {
-        currentWarrior = deadenemy
-        this._calculateWarriors(-1)
+        world.currentWarrior = deadenemy
+        world.warriors -= 1
       }
     } else {
-      currentEnemy = deadenemy
-      enemycount -= 1
+      world.currentEnemy = deadenemy
+      world.enemycount -= 1
     }
-
-    const world = this.state.world
-    world.enemycount  = enemycount
-    world.currentEnemy = currentEnemy
-    world.currentWarrior = currentWarrior
-    world.combatlevel = combatlevel
-    world.inBattle = inBattle
-    world.warriors = warriors
-    world.warriorbuff = warriorbuff
-    world.duginhp = duginhp
 
     this.setState({ world })
   }
@@ -331,7 +323,7 @@ class Home extends React.Component<IProps, IState> {
         world.currentWarrior = warriorclasses[0]
       }
     } else {
-      this._calculateIncome(Math.floor(0.5 * dice) + world.patronage)
+      world.coin = this._calculateIncome(Math.floor(0.5 * dice) + world.patronage, world.coin)
       world.pops += Math.floor(0.4 * dice)
     }
 
@@ -372,7 +364,7 @@ class Home extends React.Component<IProps, IState> {
     switch (card.name) {
       case 'Guardian': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          this._calculateWarriors(5)
+          world.warriors += 5
           world.coin -= card.cost
           world.pops -= card.popcost
           this._runUI(false, world)
@@ -396,7 +388,7 @@ class Home extends React.Component<IProps, IState> {
       }
       case 'Moo Mula': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          this._calculateIncome(this._rollDice() * 2)
+          world.coin = this._calculateIncome(this._rollDice() * 2, world.coin)
           world.coin -= card.cost
           world.pops -= card.popcost
           this._runUI(false, world)
@@ -451,7 +443,7 @@ class Home extends React.Component<IProps, IState> {
       case 'Kramdr': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           const dice = Math.floor(this._rollDice())
-          this._calculateIncome(dice * 4)
+          world.coin = this._calculateIncome(dice * 4, world.coin)
           this._calculatePeasants(dice * 10)
           world.enemycount = 0
           world.coin -= card.cost

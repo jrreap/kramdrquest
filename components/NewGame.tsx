@@ -47,7 +47,7 @@ class NewGame extends React.Component<NewGameProps> {
             KramdrQuest
           </Text>
           <Text style={{ fontSize: 18, fontWeight: 'bold', paddingBottom: 30 }}>
-            Developed by Jaydon Reap 2019
+            Developed by Jrreap 2019
           </Text>
           <Animatable.Text animation='fadeInLeft' delay={1000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>The pocket-sized adventure game</Animatable.Text>
           <Animatable.Text animation='fadeInRight' delay={2000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Beginning generation...</Animatable.Text>

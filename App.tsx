@@ -6,7 +6,6 @@ import Game from './components/Game'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 
-
 // Export the entry point for React Native
 
 const Stack = createStackNavigator()

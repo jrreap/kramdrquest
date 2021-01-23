@@ -9,8 +9,10 @@ import { styles, CARDS } from '../core/consts'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 import * as Animatable from 'react-native-animatable'
 
+import { DefeatProps } from '../types'
+
 // Defeat screen, if you die this is where you go
-class Defeat extends React.Component {
+class Defeat extends React.Component<DefeatProps> {
   // Calculates the end game stats
   _calcStats () {
     const stats = []

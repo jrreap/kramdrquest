@@ -7,6 +7,7 @@ import { Audio } from 'expo-av'
 import { styles } from '../core/consts'
 
 import World from '../core/worldTools/World'
+import { NewGameProps } from '../types'
 
 import {
   Text,
@@ -14,8 +15,8 @@ import {
   TouchableHighlight
 } from 'react-native'
 
-class NewGame extends React.Component {
-  constructor (props) {
+class NewGame extends React.Component<NewGameProps> {
+  constructor (props: NewGameProps) {
     super(props)
 
     this.state = {}

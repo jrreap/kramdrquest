@@ -13,6 +13,7 @@ import {
 import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import { GameProps } from '../types'
 import World from '../core/worldTools/World'
 
 /*
@@ -46,16 +47,11 @@ interface IState {
   question: string
 }
 
-interface IProps {
-  world: World,
-  navigation: unknown,
-  route: unknown
-}
-class Game extends React.Component<IProps, IState> {
-  constructor (props) {
+class Game extends React.Component<GameProps, IState> {
+  constructor (props : GameProps) {
     super(props)
     // Fetch the world passed in from the generation
-    const world = this.props.route.params.world
+    const world = this.props.route.params.world ?? undefined
 
     // Expand this world into state so we have the entire class ready to go
     this.state = {

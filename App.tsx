@@ -10,8 +10,12 @@ import {
   Dimensions
 } from 'react-native'
 
-import { styles } from './core/consts'
+import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from './core/consts'
 import NewGame from './components/NewGame'
+import SlidingUpPanel from 'rn-sliding-up-panel'
+import { createAppContainer, createStackNavigator } from 'react-navigation'
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
+import World from './core/worldTools/World'
 
 /*
           ======= KRAMDRQUEST =======
@@ -34,86 +38,6 @@ import NewGame from './components/NewGame'
       - Straight up amazing game :)
 
 */
-
-// Word of warning yes I know some of this stuff should be in other components (its react best practices after all)
-// it was simply easier to just keep everything in one file for now so I didn't have to mess with props... so yeah be warned!
-
-
-// Additional Packages/Icons via NPM
-import * as Animatable from 'react-native-animatable'
-import SlidingUpPanel from 'rn-sliding-up-panel'
-import { createAppContainer, createStackNavigator, NavigationContext } from 'react-navigation'
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
-import World from './core/worldTools/World'
-
-let _question = ' '
-
-// weird errors happened when I tried to just have null be the "dead" state so I used this instead
-const deadenemy = { name: 'dead', health: 0, damage: 1, icon: 'skull' }
-
-// The classes of enemy warriors
-const enemyclasses = [
-  { name: 'peasant', health: 10, damage: 1, icon: 'sword' },
-  { name: 'beserker', health: 10, damage: 2, icon: 'axe' }
-]
-
-// The classes of soilders for the king's army
-const warriorclasses = [
-  { name: 'peasant', health: 10, damage: 1, icon: 'feather' },
-  { name: 'guard', health: 10, damage: 2, icon: 'shield-plus-outline' }
-]
-
-// Every card from the game and their stats
-const cards = [
-  { name: 'Guardian', description: 'Train more peasants into guards', icon: 'sword', unlocked: true, id: 1, cost: 5, popcost: 2 },
-  { name: 'Moo Mula', description: 'Converting humans to money... what could go wrong!', icon: 'cow', unlocked: false, id: 2, cost: 0, popcost: 10 },
-  { name: 'Dig In', description: 'Fortify the kingdom with walls!', icon: 'shovel', unlocked: false, id: 3, cost: 25, popcost: 0 },
-  { name: 'Train', description: 'Give those guards some training!', icon: 'flag', unlocked: false, id: 4, cost: 10, popcost: 0 },
-  { name: 'Patronage', description: 'Throw money at your peasants to make more money!', icon: 'artist', unlocked: false, id: 5, cost: 25, popcost: 1 },
-  { name: 'Arrow Storm', description: 'Rain fire from above!', icon: 'bullseye-arrow', unlocked: false, id: 6, cost: 10, popcost: 0 },
-  { name: 'Kramdr', description: 'Make things a little steamy...', icon: 'skull', unlocked: false, id: 7, cost: 200, popcost: 100 }
-]
-
-// Quest responses, these are directly related to the card at the same index in the cards array
-// Each has a few different variations so people don't just memorize the quests/actions
-const quests = [
-  {
-    response1: 'Sir a strange man has appeared at our gates saying he wishes to buy some of our peasants from us... should we let him?',
-    response2: 'Sire! Your royal magicians have discovered a way to turn peasants into coin! Should we let them?',
-    a1: true,
-    a2: true
-  },
-  {
-    response1: 'One of our peasants found a giant stone outside, during the attack he managed to hide behind it for safety... maybe this could be used for our troops?',
-    response2: 'Sire! Some crazy dude thought it might be smart to build a wall in front of the troops... can you imagine that?',
-    a1: true,
-    a2: true
-  },
-  {
-    response1: 'Some dude showed up and said we should train our soilders, despite our troops having the best of pitchforks. We could prepare a neq training method if you so choose sire.',
-    response2: 'Troops are starting to complain that they are dropping like flies... I say we just kill them all.',
-    a1: true,
-    a2: false
-  },
-  {
-    response1: 'Permission to chuck money at our peasants?',
-    response2: 'Sire! Our research team has discovered if you give peasants money they actually SPEND it. Crazy right? Should we start giving the peasants money?',
-    a1: true,
-    a2: true
-  },
-  {
-    response1: "Our archers are upset they don't get to do anything... should we let them vent their anger on the enemy?",
-    response2: 'Our archers seem to want to just ranomly kill things... which is a problem. Should we let them just kill the enemy forces?',
-    a1: true,
-    a2: true
-  },
-  {
-    response1: 'So this crazy dude appeared at our gates. He says hes like a... computer teacher, whatever that is. Should we let him in?',
-    response2: 'Sire! Some guy is stealing all our food! Should we stop him?',
-    a1: true,
-    a2: false
-  }
-]
 
 // Defeat screen, if you die this is where you go
 /* 
@@ -199,7 +123,8 @@ class Defeat extends React.Component {
 
 interface IState {
   world: World,
-  modal: boolean
+  modal: boolean,
+  question: string
 }
 
 interface IProps {
@@ -215,7 +140,8 @@ class Home extends React.Component<IProps, IState> {
     // Expand this world into state so we have the entire class ready to go
     this.state = {
       world,
-      modal: false
+      modal: false,
+      question: ''
     }
   }
 
@@ -257,11 +183,11 @@ class Home extends React.Component<IProps, IState> {
   _conductBattle () {
     const world = this.state.world
 
-    if (world.currentEnemy === deadenemy && world.enemycount > 0) {
-      if (world.combatlevel < enemyclasses.length) {
-        world.currentEnemy = enemyclasses[world.combatlevel]
+    if (world.currentEnemy === DEAD && world.enemycount > 0) {
+      if (world.combatlevel < ENEMYCLASSES.length) {
+        world.currentEnemy = ENEMYCLASSES[world.combatlevel]
       } else {
-        world.currentEnemy = enemyclasses[1]
+        world.currentEnemy = ENEMYCLASSES[1]
       }
     } else if (world.enemycount <= 0) {
       world.inBattle = false
@@ -271,12 +197,12 @@ class Home extends React.Component<IProps, IState> {
       return
     }
 
-    if (world.currentWarrior === deadenemy && world.warriors > 0) {
+    if (world.currentWarrior === DEAD && world.warriors > 0) {
       if (world.warriorbuff > 0) {
-        world.currentWarrior = warriorclasses[1]
+        world.currentWarrior = WARRIORCLASSES[1]
         world.warriorbuff -= 1
       } else {
-        world.currentWarrior = warriorclasses[0]
+        world.currentWarrior = WARRIORCLASSES[0]
       }
     } else if (world.warriors <= 0) {
       world.inBattle = false
@@ -290,11 +216,11 @@ class Home extends React.Component<IProps, IState> {
       if (world.duginhp > 0) {
         world.duginhp -= 1
       } else {
-        world.currentWarrior = deadenemy
+        world.currentWarrior = DEAD
         world.warriors -= 1
       }
     } else {
-      world.currentEnemy = deadenemy
+      world.currentEnemy = DEAD
       world.enemycount -= 1
     }
 
@@ -311,16 +237,16 @@ class Home extends React.Component<IProps, IState> {
       world.inBattle = true
       world.enemycount += (this._rollDice() * dice) * world.danger
 
-      if (world.combatlevel < enemyclasses.length) {
-        world.currentEnemy = enemyclasses[world.combatlevel]
+      if (world.combatlevel < ENEMYCLASSES.length) {
+        world.currentEnemy = ENEMYCLASSES[world.combatlevel]
       } else {
-        world.currentEnemy = enemyclasses[1]
+        world.currentEnemy = ENEMYCLASSES[1]
       }
 
       if (world.warriorbuff > 0) {
-        world.currentWarrior = warriorclasses[1]
+        world.currentWarrior = WARRIORCLASSES[1]
       } else {
-        world.currentWarrior = warriorclasses[0]
+        world.currentWarrior = WARRIORCLASSES[0]
       }
     } else {
       world.coin = this._calculateIncome(Math.floor(0.5 * dice) + world.patronage, world.coin)
@@ -332,8 +258,7 @@ class Home extends React.Component<IProps, IState> {
 
   // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
-    const world = this.state.world
-    const question = quests[world.cardindex - 1]
+    const question = QUESTS[this.state.world.cardindex - 1]
     const dice = this._rollDice()
 
     if (dice > 3) {
@@ -347,8 +272,8 @@ class Home extends React.Component<IProps, IState> {
   _processQuestQuestion (response: boolean) {
     const world = this.state.world
     if (response) {
-      if (world.cardindex < cards.length) {
-        cards[world.cardindex].unlocked = true
+      if (world.cardindex < CARDS.length) {
+        CARDS[world.cardindex].unlocked = true
         world.cardindex++
         this._runUI(false, world)
       }
@@ -488,7 +413,7 @@ class Home extends React.Component<IProps, IState> {
 
     // Increases the difficulty of combat every 200 years
     if (world.years % 200 === 0) {
-      if (world.combatlevel < enemyclasses.length) {
+      if (world.combatlevel < ENEMYCLASSES.length) {
         world.combatlevel += 1
         world.danger += 1
         Alert.alert('Sire! The enemies have gotten stronger... we better train better warriors!')
@@ -497,9 +422,10 @@ class Home extends React.Component<IProps, IState> {
 
     // Runs a quest every 50 years
     if (world.years % 50 === 0) {
-      if (world.cardindex < cards.length) {
-        _question = this._createQuestQuestion()
-        this._runUI(true, world)
+      if (world.cardindex < CARDS.length) {
+        let question = this.state.question
+        question = this._createQuestQuestion()
+        this.setState({ question, modal: true })
       }
     }
 
@@ -661,7 +587,7 @@ class Home extends React.Component<IProps, IState> {
 
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
-    return cards
+    return CARDS
       .map((item) => {
         if (item.unlocked && item.popcost > 0) {
           return (
@@ -756,7 +682,7 @@ class Home extends React.Component<IProps, IState> {
         >
           <View style={styles.popupcontainer}>
             <View style={styles.popupinnercontainer}>
-              <Text style={{ fontSize: 18, alignContent: 'center', padding: 5 }}>{_question}</Text>
+              <Text style={{ fontSize: 18, alignContent: 'center', padding: 5 }}>{this.state.question}</Text>
 
               <View style={{ flexDirection: 'row' }}>
                 <View style={styles.toolbarbutton}>

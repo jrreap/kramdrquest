@@ -17,31 +17,6 @@ import { Card, GameProps } from '../types'
 import { rollDice, rollBattleDice } from '../core/utils'
 import World from '../core/worldTools/World'
 
-/*
-          ======= KRAMDRQUEST =======
-        The pocket sized adventure game
-        Developed by Jrreap (2019)
-                Version 0.0.1
-
-              ----Features----
-      - Card deck system
-      - Quest system to unlock new cards
-      - Enemy and Warrior class system
-      - Combat system
-      - Special card buff system
-      - Economy system, complete with 4 resources
-      - "World" generation
-      - Kingdom progression (seal levels)
-      - Defeat screen
-      - Music!
-      - Animations
-      - Straight up amazing game :)
-
-*/
-
-// MAIN GAME SCREEN
-// Contains all the logic and game mechanics of the actual game
-
 interface IState {
   world: World,
   modal: boolean,

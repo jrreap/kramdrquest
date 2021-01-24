@@ -1,23 +1,24 @@
 import { StyleSheet, Dimensions } from 'react-native'
 import Constants from 'expo-constants'
+import { Unit, Card, Quest } from '../types'
 
 // weird errors happened when I tried to just have null be the "dead" state so I used this instead
-export const DEAD = { name: 'dead', health: 0, damage: 1, icon: 'skull' }
+export const DEAD: Unit = { name: 'dead', health: 0, damage: 1, icon: 'skull' }
 
 // The classes of enemy warriors
-export const ENEMYCLASSES = [
+export const ENEMYCLASSES: Unit[] = [
   { name: 'peasant', health: 10, damage: 1, icon: 'sword' },
   { name: 'beserker', health: 10, damage: 2, icon: 'axe' }
 ]
 
-// The classes of soilders for the king's army
-export const WARRIORCLASSES = [
+// The classes of soliders for the king's army
+export const WARRIORCLASSES: Unit[] = [
   { name: 'peasant', health: 10, damage: 1, icon: 'feather' },
   { name: 'guard', health: 10, damage: 2, icon: 'shield-plus-outline' }
 ]
 
 // Every card from the game and their stats
-export const CARDS = [
+export const CARDS: Card[] = [
   { name: 'Guardian', description: 'Train more peasants into guards', icon: 'sword', unlocked: true, id: 1, cost: 5, popcost: 2 },
   { name: 'Moo Mula', description: 'Converting humans to money... what could go wrong!', icon: 'cow', unlocked: false, id: 2, cost: 0, popcost: 10 },
   { name: 'Dig In', description: 'Fortify the kingdom with walls!', icon: 'shovel', unlocked: false, id: 3, cost: 25, popcost: 0 },
@@ -29,7 +30,7 @@ export const CARDS = [
 
 // Quest responses, these are directly related to the card at the same index in the cards array
 // Each has a few different variations so people don't just memorize the quests/actions
-export const QUESTS = [
+export const QUESTS: Quest[] = [
   {
     response1: 'Sir a strange man has appeared at our gates saying he wishes to buy some of our peasants from us... should we let him?',
     response2: 'Sire! Your royal magicians have discovered a way to turn peasants into coin! Should we let them?',

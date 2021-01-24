@@ -13,7 +13,7 @@ import {
 import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
-import { GameProps } from '../types'
+import { Card, GameProps } from '../types'
 import World from '../core/worldTools/World'
 
 /*
@@ -200,7 +200,7 @@ class Game extends React.Component<GameProps, IState> {
 
   // If a card is "played" then it will be processed WITHOUT moving the tick forward
   // This way the cards actually will have an effect ingame
-  _conductCardAction (card) {
+  _conductCardAction (card: Card) {
     const world = this.state.world
     switch (card.name) {
       case 'Guardian': {
@@ -507,7 +507,6 @@ class Game extends React.Component<GameProps, IState> {
       .map((item) => {
         if (item.unlocked && item.popcost > 0) {
           return (
-            // This should probably be in another class/component buuuuut
             <View>
               <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>

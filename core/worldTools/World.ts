@@ -1,5 +1,8 @@
 import { rollDice } from '../../core/utils'
 
+import { KingdomSeal, Unit } from '../../types'
+import { DEAD } from '../consts'
+
 class World {
 
   i = 0
@@ -13,13 +16,13 @@ class World {
 
   inBattle = false
   enemycount = 0
-  currentWarrior = {}
-  currentEnemy = {}
+  currentWarrior : Unit = DEAD
+  currentEnemy : Unit = DEAD
   notdead = true
   combatlevel = 0
   danger = 1
 
-  seal = { icon: 'sword', level: 0 }
+  seal : KingdomSeal = { icon: 'sword', level: 0 }
 
   duginhp = 0
   warriorbuff = 0
@@ -62,6 +65,45 @@ class World {
     this.coin += rollDice() * rollDice()
     this.warriors += Math.floor(rollDice() * 1.5)
     this.pops += Math.floor(rollDice() * 0.8)
+  }
+
+  
+
+  adjustCoin (amount: number) {
+    this.coin += amount
+  }
+
+  adjustPops (amount: number) {
+    this.pops += amount
+  }
+
+  adjustHealth (amount: number) {
+    if (this.health + amount >= 0) {
+      this.health += amount
+    } 
+  }
+
+  adjustEnemyCount (amount: number) {
+    if (this.enemycount + amount >= 0) {
+      this.enemycount += amount
+    }
+  }
+
+  setEnemyCount (amount: number) {
+    this.enemycount = amount
+  }
+
+  setBattleState (state: boolean) {
+    this.inBattle = state
+  }
+
+  isAlive () {
+    return this.notdead
+  }
+
+  calculateIncome () {
+    const income = Math.floor(0.5 * rollDice()) + this.patronage
+    this.adjustCoin(income)
   }
 }
 

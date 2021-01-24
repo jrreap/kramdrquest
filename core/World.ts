@@ -73,7 +73,7 @@ class World {
   public set health (amount: number){
     if (amount >= 0) {
       this._health = amount
-    } 
+    }
   }
 
   public get isAlive () {

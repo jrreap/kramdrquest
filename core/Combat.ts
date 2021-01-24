@@ -24,7 +24,7 @@ class Combat {
       world.inBattle = false
       world.calculateIncome(2) // Loot
       world.enemyCount = 0
-      return
+      return true
     }
 
     if (world.currentWarrior === DEAD && world.warriors > 0) {
@@ -38,7 +38,8 @@ class Combat {
       world.inBattle = false
       world.enemyCount = 0
       world.health--
-      return
+
+      return world.isAlive
     }
 
     if (world.currentWarrior.damage * rollDice() < world.currentEnemy.damage * rollDice()) {
@@ -52,6 +53,8 @@ class Combat {
       world.currentEnemy = DEAD
       world.enemyCount -= 1
     }
+
+    return true
   }
 
   public conductPeace  () {

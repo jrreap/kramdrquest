@@ -169,7 +169,10 @@ class Game extends React.Component<GameProps, IState> {
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
   nextTurn () {
     if (this.world.inBattle) {
-      this.combat.conductBattle()
+      const isAlive = this.combat.conductBattle()
+      if (!isAlive) {
+        this.props.navigation.push('Defeat', {years: this.world.years})
+      }
     } else {
       this.combat.conductPeace()
     }
@@ -349,10 +352,10 @@ class Game extends React.Component<GameProps, IState> {
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
     return CARDS
-      .map((item, index) => {
+      .map((item) => {
         if (item.unlocked && item.popcost > 0) {
           return (
-            <View key={index}>
+            <View key={item.name}>
               <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
@@ -372,7 +375,7 @@ class Game extends React.Component<GameProps, IState> {
           )
         } else if (item.unlocked) {
           return (
-            <View key={index}>
+            <View key={item.name}>
               <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />

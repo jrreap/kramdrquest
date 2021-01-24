@@ -6,26 +6,25 @@ import { DEAD } from '../consts'
 class World {
 
   i = 0
-  cardindex = 1
+  cardIndex = 1
 
   warriors = 10
-  health = 3
+  private _health = 3
   coin = 10
   pops = 25
   years = 1
 
   inBattle = false
-  enemycount = 0
+  enemyCount = 0
   currentWarrior : Unit = DEAD
   currentEnemy : Unit = DEAD
-  notdead = true
-  combatlevel = 0
+  combatLevel = 0
   danger = 1
 
   seal : KingdomSeal = { icon: 'sword', level: 0 }
 
-  duginhp = 0
-  warriorbuff = 0
+  fortifications = 0
+  warriorBuff = 0
   patronage = 0
 
   constructor() {
@@ -67,43 +66,28 @@ class World {
     this.pops += Math.floor(rollDice() * 0.8)
   }
 
-  
-
-  adjustCoin (amount: number) {
-    this.coin += amount
+  public get health () {
+    return this._health
   }
 
-  adjustPops (amount: number) {
-    this.pops += amount
-  }
-
-  adjustHealth (amount: number) {
-    if (this.health + amount >= 0) {
-      this.health += amount
+  public set health (amount: number){
+    if (amount >= 0) {
+      this._health = amount
     } 
   }
 
-  adjustEnemyCount (amount: number) {
-    if (this.enemycount + amount >= 0) {
-      this.enemycount += amount
-    }
+  public get isAlive () {
+    return this.health > 0
   }
 
-  setEnemyCount (amount: number) {
-    this.enemycount = amount
+  public increaseDifficultyLevel () {
+    this.combatLevel++
+    this.danger++
   }
 
-  setBattleState (state: boolean) {
-    this.inBattle = state
-  }
-
-  isAlive () {
-    return this.notdead
-  }
-
-  calculateIncome () {
-    const income = Math.floor(0.5 * rollDice()) + this.patronage
-    this.adjustCoin(income)
+  public calculateIncome (multiplier = 0.5) {
+    const income = Math.floor(multiplier * rollDice()) + this.patronage
+    this.coin += income
   }
 }
 

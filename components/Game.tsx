@@ -14,6 +14,7 @@ import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../co
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { Card, GameProps } from '../types'
+import { rollDice, rollBattleDice } from '../core/utils'
 import World from '../core/worldTools/World'
 
 /*
@@ -61,83 +62,50 @@ class Game extends React.Component<GameProps, IState> {
     }
   }
 
-  // Utility methods that help run certain game components and keep track of internal stats
-  _calculateIncome (amount: number, totalCoin: number) {
-    totalCoin += amount
-    return totalCoin
-  }
-
-  _calculateHealth (amount: number) {
-    if (this.state.world.health < 25) {
-      const world = this.state.world
-      world.health += amount
-      this.setState({ world })
-    }
-  }
-
-  _removeHealth (amount: number, totalHealth: number) {
-    if (totalHealth - amount > 0) {
-      return totalHealth - amount
-    } else {
-      this.props.navigation.push('Defeat', { years: this.state.world.years})
-      return 0
-    }
-  }
-
-  _calculatePeasants (amount: number) {
-    const world = this.state.world
-    world.pops += amount
-    this.setState({ world })
-  }
-
-  _calculateLoot (amount: number, totalCoin: number) {
-    const dice = amount * this._rollDice()
-    return this._calculateIncome(Math.floor(dice * 0.5), totalCoin)
-  }
 
   // Conduct "war" with the enemies and see who wins, whoever runs out of soliders first loses the battle
   _conductBattle () {
     const world = this.state.world
 
-    if (world.currentEnemy === DEAD && world.enemycount > 0) {
-      if (world.combatlevel < ENEMYCLASSES.length) {
-        world.currentEnemy = ENEMYCLASSES[world.combatlevel]
+    if (world.currentEnemy === DEAD && world.enemyCount > 0) {
+      if (world.combatLevel < ENEMYCLASSES.length) {
+        world.currentEnemy = ENEMYCLASSES[world.combatLevel]
       } else {
         world.currentEnemy = ENEMYCLASSES[1]
       }
-    } else if (world.enemycount <= 0) {
+    } else if (world.enemyCount <= 0) {
       world.inBattle = false
-      world.coin = this._calculateLoot(world.enemycount, world.coin)
-      world.enemycount = 0
+      world.calculateIncome(2) // Loot
+      world.enemyCount = 0
       this.setState({ world })
       return
     }
 
     if (world.currentWarrior === DEAD && world.warriors > 0) {
-      if (world.warriorbuff > 0) {
+      if (world.warriorBuff > 0) {
         world.currentWarrior = WARRIORCLASSES[1]
-        world.warriorbuff -= 1
+        world.warriorBuff -= 1
       } else {
         world.currentWarrior = WARRIORCLASSES[0]
       }
     } else if (world.warriors <= 0) {
       world.inBattle = false
-      world.enemycount = 0
-      world.health = this._removeHealth(1, world.health)
+      world.enemyCount = 0
+      world.health--
       this.setState({ world })
       return
     }
 
-    if (world.currentWarrior.damage * this._rollDice() < world.currentEnemy.damage * this._rollDice()) {
-      if (world.duginhp > 0) {
-        world.duginhp -= 1
+    if (world.currentWarrior.damage * rollDice() < world.currentEnemy.damage * rollDice()) {
+      if (world.fortifications > 0) {
+        world.fortifications -= 1
       } else {
         world.currentWarrior = DEAD
         world.warriors -= 1
       }
     } else {
       world.currentEnemy = DEAD
-      world.enemycount -= 1
+      world.enemyCount -= 1
     }
 
     this.setState({ world })
@@ -145,27 +113,27 @@ class Game extends React.Component<GameProps, IState> {
 
   // If the kingdom is at peace, collect income and increase the population
   _conductPeace () {
-    const dice = this._rollDice()
+    const dice = rollDice()
     const world = this.state.world
 
-    if (this._rollInBattleDice() >= 19) {
+    if (rollBattleDice() >= 19) {
       Alert.alert('Enemies are approaching sire! To arms!')
       world.inBattle = true
-      world.enemycount += (this._rollDice() * dice) * world.danger
+      world.enemyCount += (rollDice() * dice) * world.danger
 
-      if (world.combatlevel < ENEMYCLASSES.length) {
-        world.currentEnemy = ENEMYCLASSES[world.combatlevel]
+      if (world.combatLevel < ENEMYCLASSES.length) {
+        world.currentEnemy = ENEMYCLASSES[world.combatLevel]
       } else {
         world.currentEnemy = ENEMYCLASSES[1]
       }
 
-      if (world.warriorbuff > 0) {
+      if (world.warriorBuff > 0) {
         world.currentWarrior = WARRIORCLASSES[1]
       } else {
         world.currentWarrior = WARRIORCLASSES[0]
       }
     } else {
-      world.coin = this._calculateIncome(Math.floor(0.5 * dice) + world.patronage, world.coin)
+      world.calculateIncome()
       world.pops += Math.floor(0.4 * dice)
     }
 
@@ -174,8 +142,8 @@ class Game extends React.Component<GameProps, IState> {
 
   // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
-    const question = QUESTS[this.state.world.cardindex - 1]
-    const dice = this._rollDice()
+    const question = QUESTS[this.state.world.cardIndex - 1]
+    const dice = rollDice()
 
     if (dice > 3) {
       return question.response1
@@ -188,9 +156,9 @@ class Game extends React.Component<GameProps, IState> {
   _processQuestQuestion (response: boolean) {
     const world = this.state.world
     if (response) {
-      if (world.cardindex < CARDS.length) {
-        CARDS[world.cardindex].unlocked = true
-        world.cardindex++
+      if (world.cardIndex < CARDS.length) {
+        CARDS[world.cardIndex].unlocked = true
+        world.cardIndex++
         this._runUI(false, world)
       }
     } else {
@@ -217,7 +185,7 @@ class Game extends React.Component<GameProps, IState> {
       }
       case 'Train': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.warriorbuff += 5
+          world.warriorBuff += 5
           world.coin -= card.cost
           world.pops -= card.popcost
           this._runUI(false, world)
@@ -229,7 +197,7 @@ class Game extends React.Component<GameProps, IState> {
       }
       case 'Moo Mula': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.coin = this._calculateIncome(this._rollDice() * 2, world.coin)
+          world.calculateIncome(2)
           world.coin -= card.cost
           world.pops -= card.popcost
           this._runUI(false, world)
@@ -242,7 +210,7 @@ class Game extends React.Component<GameProps, IState> {
       case 'Dig In': {
         if (world.coin - card.cost >= 0) {
           world.coin -= card.cost
-          world.duginhp += 5
+          world.fortifications += 5
           this._runUI(false, world)
           break
         } else {
@@ -264,11 +232,11 @@ class Game extends React.Component<GameProps, IState> {
       }
       case 'Arrow Storm': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(this._rollDice())
-          if (world.enemycount - dice >= 0) {
-            world.enemycount -= dice
+          const dice = Math.floor(rollDice())
+          if (world.enemyCount - dice >= 0) {
+            world.enemyCount -= dice
           } else {
-            world.enemycount = 0
+            world.enemyCount = 0
           }
 
           world.coin -= card.cost
@@ -283,30 +251,19 @@ class Game extends React.Component<GameProps, IState> {
       // Straight up the most OP card
       case 'Kramdr': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(this._rollDice())
-          world.coin = this._calculateIncome(dice * 4, world.coin)
-          this._calculatePeasants(dice * 10)
-          world.enemycount = 0
+          const dice = Math.floor(rollDice())
+          world.calculateIncome(4)
+          world.pops += dice * 10
+          world.enemyCount = 0
           world.coin -= card.cost
           world.pops -= card.popcost
           this._runUI(false, world)
-          break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
-          break
         }
+        break
       }
     }
-  }
-
-  // Rolls a "dice" to help in adding some chance to the game
-  _rollDice () {
-    return Math.floor((Math.random() * 6) + 1)
-  }
-
-  // Special version of the dice role to calculate a 1 to 20 roll
-  _rollInBattleDice () {
-    return Math.floor((Math.random() * 20) + 1)
   }
 
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
@@ -329,16 +286,15 @@ class Game extends React.Component<GameProps, IState> {
 
     // Increases the difficulty of combat every 200 years
     if (world.years % 200 === 0) {
-      if (world.combatlevel < ENEMYCLASSES.length) {
-        world.combatlevel += 1
-        world.danger += 1
+      if (world.combatLevel < ENEMYCLASSES.length) {
+        world.increaseDifficultyLevel()
         Alert.alert('Sire! The enemies have gotten stronger... we better train better warriors!')
       }
     }
 
     // Runs a quest every 50 years
     if (world.years % 50 === 0) {
-      if (world.cardindex < CARDS.length) {
+      if (world.cardIndex < CARDS.length) {
         let question = this.state.question
         question = this._createQuestQuestion()
         this.setState({ question, modal: true })
@@ -361,13 +317,13 @@ class Game extends React.Component<GameProps, IState> {
 
   // Returns the UI for combat
   _returnCombatMenu () {
-    const { inBattle, duginhp, enemycount, currentEnemy, currentWarrior} = this.state.world
+    const { inBattle, fortifications, enemyCount, currentEnemy, currentWarrior} = this.state.world
     if (inBattle) {
-      if (duginhp > 1) {
+      if (fortifications > 1) {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemycount}</Text>
+            <Text>Enemy Strength: {enemyCount}</Text>
             <View style={styles.combatinnercontainer}>
               <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
@@ -376,11 +332,11 @@ class Game extends React.Component<GameProps, IState> {
             </View>
           </View>
         )
-      } else if (duginhp === 1) {
+      } else if (fortifications === 1) {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemycount}</Text>
+            <Text>Enemy Strength: {enemyCount}</Text>
             <View style={styles.combatinnercontainer}>
               <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
@@ -393,7 +349,7 @@ class Game extends React.Component<GameProps, IState> {
         return (
           <View style={styles.combatcontainer}>
             <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemycount}</Text>
+            <Text>Enemy Strength: {enemyCount}</Text>
             <View style={styles.combatinnercontainer}>
               <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
               <Text style={{ padding: 10 }}>VS</Text>
@@ -504,10 +460,10 @@ class Game extends React.Component<GameProps, IState> {
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
     return CARDS
-      .map((item) => {
+      .map((item, index) => {
         if (item.unlocked && item.popcost > 0) {
           return (
-            <View>
+            <View key={index}>
               <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
@@ -527,7 +483,7 @@ class Game extends React.Component<GameProps, IState> {
           )
         } else if (item.unlocked) {
           return (
-            <View>
+            <View key={index}>
               <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
@@ -549,11 +505,10 @@ class Game extends React.Component<GameProps, IState> {
 
   // Adds in spacers to the array to make the deck look a bit fancier
   _processCardDeck () {
-    let i = 0
-    const spacer = <View style={styles.spacer} />
+    let i = 1
     const data = this._renderCardDeck()
     while (i <= data.length) {
-      data.splice(i, 0, spacer)
+      data.splice(i, 0, <View key={i} style={styles.spacer} />)
       i += 2
     }
 

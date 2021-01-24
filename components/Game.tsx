@@ -10,114 +10,42 @@ import {
   Dimensions
 } from 'react-native'
 
-import { styles, DEAD, WARRIORCLASSES, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
+import { styles, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { Card, GameProps } from '../types'
-import { rollDice, rollBattleDice } from '../core/utils'
-import World from '../core/worldTools/World'
+import { rollDice } from '../core/utils'
+import World from '../core/World'
+import Combat from '../core/Combat'
 
 interface IState {
-  world: World,
   modal: boolean,
   question: string
 }
 
 class Game extends React.Component<GameProps, IState> {
+
+  world : World
+  combat : Combat
+
   constructor (props : GameProps) {
     super(props)
     // Fetch the world passed in from the generation
-    const world = this.props.route.params.world ?? undefined
+    // We keep it out of state since the actual world instance remains constant
+    this.world = this.props.route.params.world ?? undefined
+    this.combat = new Combat(this.world)
 
-    // Expand this world into state so we have the entire class ready to go
     this.state = {
-      world,
       modal: false,
       question: ''
     }
-  }
 
-
-  // Conduct "war" with the enemies and see who wins, whoever runs out of soliders first loses the battle
-  _conductBattle () {
-    const world = this.state.world
-
-    if (world.currentEnemy === DEAD && world.enemyCount > 0) {
-      if (world.combatLevel < ENEMYCLASSES.length) {
-        world.currentEnemy = ENEMYCLASSES[world.combatLevel]
-      } else {
-        world.currentEnemy = ENEMYCLASSES[1]
-      }
-    } else if (world.enemyCount <= 0) {
-      world.inBattle = false
-      world.calculateIncome(2) // Loot
-      world.enemyCount = 0
-      this.setState({ world })
-      return
-    }
-
-    if (world.currentWarrior === DEAD && world.warriors > 0) {
-      if (world.warriorBuff > 0) {
-        world.currentWarrior = WARRIORCLASSES[1]
-        world.warriorBuff -= 1
-      } else {
-        world.currentWarrior = WARRIORCLASSES[0]
-      }
-    } else if (world.warriors <= 0) {
-      world.inBattle = false
-      world.enemyCount = 0
-      world.health--
-      this.setState({ world })
-      return
-    }
-
-    if (world.currentWarrior.damage * rollDice() < world.currentEnemy.damage * rollDice()) {
-      if (world.fortifications > 0) {
-        world.fortifications -= 1
-      } else {
-        world.currentWarrior = DEAD
-        world.warriors -= 1
-      }
-    } else {
-      world.currentEnemy = DEAD
-      world.enemyCount -= 1
-    }
-
-    this.setState({ world })
-  }
-
-  // If the kingdom is at peace, collect income and increase the population
-  _conductPeace () {
-    const dice = rollDice()
-    const world = this.state.world
-
-    if (rollBattleDice() >= 19) {
-      Alert.alert('Enemies are approaching sire! To arms!')
-      world.inBattle = true
-      world.enemyCount += (rollDice() * dice) * world.danger
-
-      if (world.combatLevel < ENEMYCLASSES.length) {
-        world.currentEnemy = ENEMYCLASSES[world.combatLevel]
-      } else {
-        world.currentEnemy = ENEMYCLASSES[1]
-      }
-
-      if (world.warriorBuff > 0) {
-        world.currentWarrior = WARRIORCLASSES[1]
-      } else {
-        world.currentWarrior = WARRIORCLASSES[0]
-      }
-    } else {
-      world.calculateIncome()
-      world.pops += Math.floor(0.4 * dice)
-    }
-
-    this.setState({ world })
+    this.nextTurn.bind(this)
   }
 
   // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
-    const question = QUESTS[this.state.world.cardIndex - 1]
+    const question = QUESTS[this.world.cardIndex - 1]
     const dice = rollDice()
 
     if (dice > 3) {
@@ -129,29 +57,28 @@ class Game extends React.Component<GameProps, IState> {
 
   // Processes the response via the user from the quest prompt
   _processQuestQuestion (response: boolean) {
-    const world = this.state.world
+    const world = this.world
     if (response) {
       if (world.cardIndex < CARDS.length) {
         CARDS[world.cardIndex].unlocked = true
         world.cardIndex++
-        this._runUI(false, world)
+        this.setState({ modal: false})
       }
     } else {
-      this._runUI(false, world)
+      this.setState({ modal: false})
     }
   }
 
   // If a card is "played" then it will be processed WITHOUT moving the tick forward
   // This way the cards actually will have an effect ingame
   _conductCardAction (card: Card) {
-    const world = this.state.world
+    const world = this.world
     switch (card.name) {
       case 'Guardian': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
           world.warriors += 5
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -163,7 +90,6 @@ class Game extends React.Component<GameProps, IState> {
           world.warriorBuff += 5
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -175,7 +101,6 @@ class Game extends React.Component<GameProps, IState> {
           world.calculateIncome(2)
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -186,7 +111,6 @@ class Game extends React.Component<GameProps, IState> {
         if (world.coin - card.cost >= 0) {
           world.coin -= card.cost
           world.fortifications += 5
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -198,7 +122,6 @@ class Game extends React.Component<GameProps, IState> {
           world.patronage += 1
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -216,7 +139,6 @@ class Game extends React.Component<GameProps, IState> {
 
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
           break
         } else {
           Alert.alert('Sire! We do not have enough for that!')
@@ -232,44 +154,46 @@ class Game extends React.Component<GameProps, IState> {
           world.enemyCount = 0
           world.coin -= card.cost
           world.pops -= card.popcost
-          this._runUI(false, world)
         } else {
           Alert.alert('Sire! We do not have enough for that!')
         }
         break
       }
     }
+
+    // Trigger a refresh... will not be needed once things are broken into smaller components
+    // Props would then trigger rerendering without state!
+    this.setState({})
   }
 
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
-  _runTick () {
-    if (this.state.world.inBattle) {
-      this._conductBattle()
+  nextTurn () {
+    if (this.world.inBattle) {
+      this.combat.conductBattle()
     } else {
-      this._conductPeace()
+      this.combat.conductPeace()
     }
 
-    const world = this.state.world
-    world.years += 1
+    this.world.years += 1
 
     // Increases the seal level every 100 years
-    if (world.years % 100 === 0) {
-      if (world.seal.level < 6) {
-        world.seal.level++
+    if (this.world.years % 100 === 0) {
+      if (this.world.seal.level < 6) {
+        this.world.seal.level++
       }
     }
 
     // Increases the difficulty of combat every 200 years
-    if (world.years % 200 === 0) {
-      if (world.combatLevel < ENEMYCLASSES.length) {
-        world.increaseDifficultyLevel()
+    if (this.world.years % 200 === 0) {
+      if (this.world.combatLevel < ENEMYCLASSES.length) {
+        this.world.increaseDifficultyLevel()
         Alert.alert('Sire! The enemies have gotten stronger... we better train better warriors!')
       }
     }
 
     // Runs a quest every 50 years
-    if (world.years % 50 === 0) {
-      if (world.cardIndex < CARDS.length) {
+    if (this.world.years % 50 === 0) {
+      if (this.world.cardIndex < CARDS.length) {
         let question = this.state.question
         question = this._createQuestQuestion()
         this.setState({ question, modal: true })
@@ -277,22 +201,12 @@ class Game extends React.Component<GameProps, IState> {
     }
 
     // Refresh the screen now that everything has been compiled for the next tick
-    this.setState({ world })
-  }
-
-  // Runs a state update, but skips the tick. Used for UI updates before executing the next turn
-  _runUI (modal: boolean, world: World) {
-    this.setState({ world, modal: modal })
-  }
-
-  // Execute a tick
-  _onPressButton () {
-    this._runTick()
+    this.setState({})
   }
 
   // Returns the UI for combat
   _returnCombatMenu () {
-    const { inBattle, fortifications, enemyCount, currentEnemy, currentWarrior} = this.state.world
+    const { inBattle, fortifications, enemyCount, currentEnemy, currentWarrior} = this.world
     if (inBattle) {
       if (fortifications > 1) {
         return (
@@ -345,7 +259,7 @@ class Game extends React.Component<GameProps, IState> {
 
   // Returns the seal of the kingdom based on the level and game
   _returnKingdomSeal () {
-    const { seal } = this.state.world
+    const { seal } = this.world
     switch (seal.level) {
       case (0): {
         return (
@@ -496,7 +410,7 @@ class Game extends React.Component<GameProps, IState> {
       bottom: 50
     }
 
-    const { health, coin, warriors, pops, years } = this.state.world
+    const { health, coin, warriors, pops, years } = this.world
 
     return (
 
@@ -568,7 +482,7 @@ class Game extends React.Component<GameProps, IState> {
 
           <View style={styles.toolbarbutton}>
             <TouchableHighlight
-              onPress={() => this._onPressButton()}
+              onPress={this.nextTurn}
               underlayColor='#c4c4c4'
             >
               <View style={styles.button}>

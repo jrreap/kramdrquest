@@ -1,5 +1,5 @@
 import { StackScreenProps } from '@react-navigation/stack'
-import World from './core/worldTools/World'
+import World from './core/World'
 
 export type RootStackParamList = {
   NewGame: undefined

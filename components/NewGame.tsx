@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons'
 import { Audio } from 'expo-av'
 import { styles } from '../core/consts'
 
-import World from '../core/worldTools/World'
+import World from '../core/World'
 import { NewGameProps } from '../types'
 
 import {

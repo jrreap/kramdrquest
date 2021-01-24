@@ -1,7 +1,7 @@
-import { rollDice } from '../../core/utils'
+import { rollDice } from './utils'
 
-import { KingdomSeal, Unit } from '../../types'
-import { DEAD } from '../consts'
+import { KingdomSeal, Unit } from '../types'
+import { DEAD } from './consts'
 
 class World {
 

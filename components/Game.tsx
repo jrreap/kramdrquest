@@ -40,7 +40,7 @@ class Game extends React.Component<GameProps, IState> {
       question: ''
     }
 
-    this.nextTurn.bind(this)
+    this.nextTurn = this.nextTurn.bind(this)
   }
 
   // Quest system, responsible for determining if a card is unlocked or not

@@ -5,7 +5,7 @@ import { DEAD, WARRIORCLASSES, ENEMYCLASSES} from './consts'
 
 
 class Combat {
-  worldData : World
+  private worldData : World
 
   constructor (world: World) {
     this.worldData = world

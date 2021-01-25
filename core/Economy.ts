@@ -3,8 +3,7 @@ import World from './World'
 import { rollDice } from './utils'
 
 class Economy {
-
-  worldData  : World
+  private worldData  : World
 
   constructor (world: World) {
     this.worldData = world

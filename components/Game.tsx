@@ -32,6 +32,8 @@ class Game extends React.Component<GameProps, IState> {
     // Fetch the world passed in from the generation
     // We keep it out of state since the actual world instance remains constant
     this.world = this.props.route.params.world ?? undefined
+
+    // Aspects of the world that build on the base data from the kingdom
     this.combat = new Combat(this.world)
     this.economy = new Economy(this.world)
 

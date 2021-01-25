@@ -18,8 +18,9 @@ export const WARRIORCLASSES: Unit[] = [
 ]
 
 // Every card from the game and their stats
+// The card ID is the index of them in this list, allows for ultra fast reads (instead of long loops over a potentially long list)
 export const CARDS: Card[] = [
-  { name: 'Guardian', description: 'Train more peasants into guards', icon: 'sword', unlocked: true, id: 1, cost: 5, popcost: 2 },
+  { name: 'Guardian', description: 'Train more peasants into guards', icon: 'sword', unlocked: false, id: 1, cost: 5, popcost: 2 },
   { name: 'Moo Mula', description: 'Converting humans to money... what could go wrong!', icon: 'cow', unlocked: false, id: 2, cost: 0, popcost: 10 },
   { name: 'Dig In', description: 'Fortify the kingdom with walls!', icon: 'shovel', unlocked: false, id: 3, cost: 25, popcost: 0 },
   { name: 'Train', description: 'Give those guards some training!', icon: 'flag', unlocked: false, id: 4, cost: 10, popcost: 0 },

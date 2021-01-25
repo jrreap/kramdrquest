@@ -14,9 +14,7 @@ import { styles, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { Card, GameProps } from '../types'
-import { rollDice } from '../core/utils'
-import World from '../core/World'
-import Combat from '../core/Combat'
+import { World, Combat, Economy, utils } from '../core'
 
 interface IState {
   modal: boolean,
@@ -27,6 +25,7 @@ class Game extends React.Component<GameProps, IState> {
 
   world : World
   combat : Combat
+  economy: Economy
 
   constructor (props : GameProps) {
     super(props)
@@ -34,6 +33,7 @@ class Game extends React.Component<GameProps, IState> {
     // We keep it out of state since the actual world instance remains constant
     this.world = this.props.route.params.world ?? undefined
     this.combat = new Combat(this.world)
+    this.economy = new Economy(this.world)
 
     this.state = {
       modal: false,
@@ -46,7 +46,7 @@ class Game extends React.Component<GameProps, IState> {
   // Quest system, responsible for determining if a card is unlocked or not
   _createQuestQuestion () {
     const question = QUESTS[this.world.cardIndex - 1]
-    const dice = rollDice()
+    const dice = utils.rollDice()
 
     if (dice > 3) {
       return question.response1
@@ -98,7 +98,7 @@ class Game extends React.Component<GameProps, IState> {
       }
       case 'Moo Mula': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.calculateIncome(2)
+          this.economy.calculateIncome(2)
           world.coin -= card.cost
           world.pops -= card.popcost
           break
@@ -130,7 +130,7 @@ class Game extends React.Component<GameProps, IState> {
       }
       case 'Arrow Storm': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(rollDice())
+          const dice = Math.floor(utils.rollDice())
           if (world.enemyCount - dice >= 0) {
             world.enemyCount -= dice
           } else {
@@ -148,8 +148,8 @@ class Game extends React.Component<GameProps, IState> {
       // Straight up the most OP card
       case 'Kramdr': {
         if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(rollDice())
-          world.calculateIncome(4)
+          const dice = Math.floor(utils.rollDice())
+          this.economy.calculateIncome(4)
           world.pops += dice * 10
           world.enemyCount = 0
           world.coin -= card.cost

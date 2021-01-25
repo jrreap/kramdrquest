@@ -3,6 +3,7 @@ import { rollDice } from './utils'
 import { KingdomSeal, Unit } from '../types'
 import { DEAD } from './consts'
 
+
 class World {
 
   i = 0
@@ -83,11 +84,6 @@ class World {
   public increaseDifficultyLevel () {
     this.combatLevel++
     this.danger++
-  }
-
-  public calculateIncome (multiplier = 0.5) {
-    const income = Math.floor(multiplier * rollDice()) + this.patronage
-    this.coin += income
   }
 }
 

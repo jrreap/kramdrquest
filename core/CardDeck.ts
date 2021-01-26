@@ -1,5 +1,6 @@
 import { World, consts } from '../core'
 import { Card } from '../types'
+import Cards from './cards'
 
 class CardDeck {
   private worldData : World
@@ -8,14 +9,16 @@ class CardDeck {
 
   constructor (world: World) {
     this.worldData = world
-
     // Unlock starting cards
     this.unlockCard(0)
   }
 
   public unlockCard (id: number) {
-    const card = consts.CARDS[id]
-    this.deck.push({...card})
+    for (const card of Cards) {
+      if (card.id === id) {
+        this.deck.push(card)
+      }
+    }
   }
 
   public getDeckCard (id: number) {

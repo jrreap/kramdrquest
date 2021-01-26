@@ -16,7 +16,7 @@ class World {
   years = 1
 
   inBattle = false
-  enemyCount = 0
+  private _enemyCount = 0
   currentWarrior : Unit = DEAD
   currentEnemy : Unit = DEAD
   combatLevel = 0
@@ -74,6 +74,18 @@ class World {
   public set health (amount: number){
     if (amount >= 0) {
       this._health = amount
+    }
+  }
+
+  public get enemyCount() {
+    return this._enemyCount
+  }
+
+  public set enemyCount(amount: number) {
+    if (this._enemyCount + amount >= 0) {
+      this._enemyCount += amount
+    } else {
+      this._enemyCount = 0
     }
   }
 

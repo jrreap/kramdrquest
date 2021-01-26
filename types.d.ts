@@ -1,5 +1,6 @@
 import { StackScreenProps } from '@react-navigation/stack'
 import World from './core/World'
+import Card from './core/cards/Card'
 
 export type RootStackParamList = {
   NewGame: undefined
@@ -24,15 +25,7 @@ export type Unit = {
   icon: string
 }
 
-export type Card = {
-  name: string,
-  description: string,
-  icon: string,
-  unlocked: boolean,
-  id: number,
-  cost: number,
-  popcost: number,
-}
+export type Card = Card
 
 export type Quest = {
   response1: string,

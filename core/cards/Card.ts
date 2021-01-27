@@ -8,6 +8,8 @@ class Card {
   cost: number
   popcost: number
 
+  unlockDanger: number
+
   constructor () {
     this.name = 'Card'
     this.desc = 'Card'
@@ -15,7 +17,7 @@ class Card {
     this.id = -1
     this.cost = 5
     this.popcost = 5
-
+    this.unlockDanger = 1
   }
 
   public action(world: World) {

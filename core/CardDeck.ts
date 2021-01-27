@@ -8,6 +8,7 @@ class CardDeck {
   private worldEconomy : Economy
 
   private deck : Card[] = []
+  private availableCards = Cards
 
   constructor (world: World, eco : Economy) {
     this.worldData = world
@@ -16,12 +17,12 @@ class CardDeck {
     this.unlockCard(0)
   }
 
-  public unlockCard (id: number) {
-    for (const card of Cards) {
-      if (card.id === id) {
-        this.deck.push(card)
-      }
-    }
+  public unlockCard (card : Card) {
+    this.deck.push(card)
+
+    this.availableCards = this.availableCards.filter((item) => {
+      return item.id !== card.id
+    })
   }
 
   public getDeckCard (id: number) {
@@ -32,6 +33,12 @@ class CardDeck {
     }
 
     return null
+  }
+
+  public getAvailableCards () {
+    return this.availableCards.filter((card) => {
+      return card.unlockDanger <= this.worldData.danger
+    })
   }
 
   public playCard (card : Card) {

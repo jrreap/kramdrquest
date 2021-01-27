@@ -15,18 +15,17 @@ class Research {
   public drawAvailableResearch () {
     const cards = this.worldDeck.getAvailableCards()
 
-    const card1 = cards[rollCustomDice(cards.length)]
-    const card2 = cards[rollCustomDice(cards.length)]
-    const card3 = cards[rollCustomDice(cards.length)]
+    const card1 = cards[rollCustomDice(cards.length - 1)]
+    const card2 = cards[rollCustomDice(cards.length - 1)]
+    const card3 = cards[rollCustomDice(cards.length - 1)]
 
-    return {
-      card1,
-      card2,
-      card3
-    }
+    console.log(card1)
+    console.log(card2)
+
+    return [card1, card2, card3]
   }
 
-  public isResearching () {
+  public get isResearching () {
     return this.currentResearch !== null
   }
 

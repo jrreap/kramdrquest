@@ -14,14 +14,15 @@ import { styles, ENEMYCLASSES } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { Card, GameProps } from '../types'
-import { World, Combat, Economy, CardDeck } from '../core'
+import { World, Combat, Economy, CardDeck, Research } from '../core'
 
 import CombatMenu from './Game/CombatMenu'
 import KingdomSeal from './Game/KingdomSeal'
 
 interface IState {
   modal: boolean,
-  question: string
+  question: string,
+  researchOptions: Card[]
 }
 
 class Game extends React.Component<GameProps, IState> {
@@ -30,6 +31,7 @@ class Game extends React.Component<GameProps, IState> {
   combat : Combat
   economy: Economy
   deck: CardDeck
+  research : Research
 
   constructor (props : GameProps) {
     super(props)
@@ -41,16 +43,17 @@ class Game extends React.Component<GameProps, IState> {
     this.economy = new Economy(this.world)
     this.combat = new Combat(this.world, this.economy)
     this.deck = new CardDeck(this.world, this.economy)
+    this.research = new Research(this.deck)
 
     this.state = {
       modal: false,
-      question: ''
+      question: '',
+      researchOptions: this.research.drawAvailableResearch()
     }
 
     this.nextTurn = this.nextTurn.bind(this)
   }
 
-  // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
   nextTurn () {
     if (this.world.inBattle) {
       const isAlive = this.combat.conductBattle()
@@ -78,9 +81,16 @@ class Game extends React.Component<GameProps, IState> {
       }
     }
 
-    // Runs a quest every 50 years
-    if (this.world.years % 50 === 0) {
-      this.deck.unlockCard(3)
+    // Completes a research at a base of 50 years, factoring in research speed
+    if (Math.floor(this.world.years % (50 / this.world.researchSpeed)) === 0) {
+      if (this.research.isResearching) {
+        this.research.attemptResearch()
+        Alert.alert('Successfully completed research!')
+        this.setState({ researchOptions: this.research.drawAvailableResearch()})
+      } else {
+        Alert.alert('You currently have no selected research! Make sure to select one!')
+        this.setState({})
+      }
       return
     }
 
@@ -94,8 +104,8 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   // Maps out and renders each card that is unlocked in the deck
-  renderCardDeck () {
-    return this.deck.getDeck()
+  renderCardDeck (deck : Card[]) {
+    return deck
       .map((item) => {
         if (item.popcost > 0) {
           return (
@@ -142,7 +152,7 @@ class Game extends React.Component<GameProps, IState> {
   // Adds in spacers to the array to make the deck look a bit fancier
   processCardDeck () {
     let i = 1
-    const data = this.renderCardDeck()
+    const data = this.renderCardDeck(this.deck.getDeck())
     while (i <= data.length) {
       data.splice(i, 0, <View key={i} style={styles.spacer} />)
       i += 2
@@ -188,29 +198,9 @@ class Game extends React.Component<GameProps, IState> {
         >
           <View style={styles.popupcontainer}>
             <View style={styles.popupinnercontainer}>
-              <Text style={{ fontSize: 18, alignContent: 'center', padding: 5 }}>{this.state.question}</Text>
-
-              <View style={{ flexDirection: 'row' }}>
-                <View style={styles.toolbarbutton}>
-                  <TouchableHighlight
-                    onPress={() => {}}
-                    underlayColor='#c4c4c4'
-                  >
-                    <View style={styles.button}>
-                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5 }}>Yes</Text>
-                    </View>
-                  </TouchableHighlight>
-                </View>
-                <View style={styles.toolbarbutton}>
-                  <TouchableHighlight
-                    onPress={() => {}}
-                    underlayColor='#c4c4c4'
-                  >
-                    <View style={styles.button}>
-                      <Text style={{ textAlign: 'center', fontSize: 15, fontWeight: 'bold', paddingLeft: 5 }}>No</Text>
-                    </View>
-                  </TouchableHighlight>
-                </View>
+              <Text style={{ fontSize: 18, alignContent: 'center', padding: 5 }}>Sire! We have 3 possible directions of research. What new tech do you wish us to start working on?</Text>
+              <View style={styles.cardcontainer}>
+                  {this.renderCardDeck(this.state.researchOptions)}
               </View>
             </View>
           </View>
@@ -251,6 +241,16 @@ class Game extends React.Component<GameProps, IState> {
                     {this.processCardDeck()}
 
                   </ScrollView>
+                </View>
+                <View style={styles.actioncontainer}>
+                  <TouchableHighlight
+                    onPress={() => {this.setState({modal: true})}}
+                    underlayColor='#c4c4c4'
+                  >
+                    <View style={styles.actionButton}>
+                      <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', paddingLeft: 5 }}>Select Research</Text>
+                    </View>
+                  </TouchableHighlight>
                 </View>
               </View>
             )}

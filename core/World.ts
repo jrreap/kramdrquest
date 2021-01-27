@@ -27,6 +27,7 @@ class World {
   fortifications = 0
   warriorBuff = 0
   patronage = 0
+  researchSpeed = 1.0
 
   constructor() {
     this.generateWorld()

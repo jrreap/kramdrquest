@@ -77,7 +77,6 @@ export const styles = StyleSheet.create({
   },
   popupcontainer: {
     flex: 1,
-    paddingTop: Constants.statusBarHeight,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -92,7 +91,15 @@ export const styles = StyleSheet.create({
   },
   cardcontainer: {
     flex: 1,
-    padding: 10
+    padding: 10,
+    maxHeight: 280
+  },
+  actioncontainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    maxHeight: 60
   },
   combatcontainer: {
     padding: 10,
@@ -166,6 +173,16 @@ export const styles = StyleSheet.create({
   },
   button: {
     width: 120,
+    height: 45,
+    backgroundColor: '#4286f4',
+    padding: 5,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignContent: 'center',
+    textAlign: 'center'
+  },
+  actionButton: {
+    width: 175,
     height: 45,
     backgroundColor: '#4286f4',
     padding: 5,

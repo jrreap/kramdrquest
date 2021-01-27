@@ -1,14 +1,17 @@
-import { World, consts } from '../core'
+import { World } from '../core'
 import { Card } from '../types'
 import Cards from './cards'
+import Economy from './Economy'
 
 class CardDeck {
   private worldData : World
+  private worldEconomy : Economy
 
   private deck : Card[] = []
 
-  constructor (world: World) {
+  constructor (world: World, eco : Economy) {
     this.worldData = world
+    this.worldEconomy = eco
     // Unlock starting cards
     this.unlockCard(0)
   }
@@ -27,10 +30,18 @@ class CardDeck {
         return card
       }
     }
+
+    return null
   }
 
-  public playCard (id: number) {
+  public playCard (card : Card) {
+    if (this.worldEconomy.canPayForCard(card)) {
+      this.worldEconomy.payForCard(card)
+      card.action(this.worldData)
+      return true
+    }
 
+    return false
   }
 
   public getDeck () {

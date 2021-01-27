@@ -2,13 +2,16 @@ import World from './World'
 
 import { rollDice, rollBattleDice } from './utils'
 import { DEAD, WARRIORCLASSES, ENEMYCLASSES} from './consts'
+import Economy from './Economy'
 
 
 class Combat {
   private worldData : World
+  private worldEconomy : Economy
 
-  constructor (world: World) {
+  constructor (world: World, eco: Economy) {
     this.worldData = world
+    this.worldEconomy = eco
   }
 
   public conductBattle () {
@@ -22,7 +25,7 @@ class Combat {
       }
     } else if (world.enemyCount <= 0) {
       world.inBattle = false
-      world.calculateIncome(2) // Loot
+      this.worldEconomy.calculateIncome(2)
       world.enemyCount = 0
       return true
     }
@@ -77,7 +80,7 @@ class Combat {
         world.currentWarrior = WARRIORCLASSES[0]
       }
     } else {
-      world.calculateIncome()
+      this.worldEconomy.calculateIncome()
       world.pops += Math.floor(0.4 * dice)
     }
   }

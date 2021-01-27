@@ -9,6 +9,7 @@
     "start": "expo start"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.168",
     "babel-preset-expo": "8.3.0"
   },
   "dependencies": {

@@ -10,11 +10,11 @@ import {
   Dimensions
 } from 'react-native'
 
-import { styles, ENEMYCLASSES, QUESTS, CARDS } from '../core/consts'
+import { styles, ENEMYCLASSES } from '../core/consts'
 import SlidingUpPanel from 'rn-sliding-up-panel'
 import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons'
 import { Card, GameProps } from '../types'
-import { World, Combat, Economy, utils } from '../core'
+import { World, Combat, Economy, CardDeck } from '../core'
 
 interface IState {
   modal: boolean,
@@ -26,6 +26,7 @@ class Game extends React.Component<GameProps, IState> {
   world : World
   combat : Combat
   economy: Economy
+  deck: CardDeck
 
   constructor (props : GameProps) {
     super(props)
@@ -34,8 +35,9 @@ class Game extends React.Component<GameProps, IState> {
     this.world = this.props.route.params.world ?? undefined
 
     // Aspects of the world that build on the base data from the kingdom
-    this.combat = new Combat(this.world)
     this.economy = new Economy(this.world)
+    this.combat = new Combat(this.world, this.economy)
+    this.deck = new CardDeck(this.world, this.economy)
 
     this.state = {
       modal: false,
@@ -43,129 +45,6 @@ class Game extends React.Component<GameProps, IState> {
     }
 
     this.nextTurn = this.nextTurn.bind(this)
-  }
-
-  // Quest system, responsible for determining if a card is unlocked or not
-  _createQuestQuestion () {
-    const question = QUESTS[this.world.cardIndex - 1]
-    const dice = utils.rollDice()
-
-    if (dice > 3) {
-      return question.response1
-    } else {
-      return question.response2
-    }
-  }
-
-  // Processes the response via the user from the quest prompt
-  _processQuestQuestion (response: boolean) {
-    const world = this.world
-    if (response) {
-      if (world.cardIndex < CARDS.length) {
-        CARDS[world.cardIndex].unlocked = true
-        world.cardIndex++
-        this.setState({ modal: false})
-      }
-    } else {
-      this.setState({ modal: false})
-    }
-  }
-
-  // If a card is "played" then it will be processed WITHOUT moving the tick forward
-  // This way the cards actually will have an effect ingame
-  _conductCardAction (card: Card) {
-    const world = this.world
-    switch (card.name) {
-      case 'Guardian': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.warriors += 5
-          world.coin -= card.cost
-          world.pops -= card.popcost
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      case 'Train': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.warriorBuff += 5
-          world.coin -= card.cost
-          world.pops -= card.popcost
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      case 'Moo Mula': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          this.economy.calculateIncome(2)
-          world.coin -= card.cost
-          world.pops -= card.popcost
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      case 'Dig In': {
-        if (world.coin - card.cost >= 0) {
-          world.coin -= card.cost
-          world.fortifications += 5
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      case 'Patronage': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          world.patronage += 1
-          world.coin -= card.cost
-          world.pops -= card.popcost
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      case 'Arrow Storm': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(utils.rollDice())
-          if (world.enemyCount - dice >= 0) {
-            world.enemyCount -= dice
-          } else {
-            world.enemyCount = 0
-          }
-
-          world.coin -= card.cost
-          world.pops -= card.popcost
-          break
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-          break
-        }
-      }
-      // Straight up the most OP card
-      case 'Kramdr': {
-        if (world.coin - card.cost >= 0 && world.pops - card.popcost >= 0) {
-          const dice = Math.floor(utils.rollDice())
-          this.economy.calculateIncome(4)
-          world.pops += dice * 10
-          world.enemyCount = 0
-          world.coin -= card.cost
-          world.pops -= card.popcost
-        } else {
-          Alert.alert('Sire! We do not have enough for that!')
-        }
-        break
-      }
-    }
-
-    // Trigger a refresh... will not be needed once things are broken into smaller components
-    // Props would then trigger rerendering without state!
-    this.setState({})
   }
 
   // My makeshift loop to update game things every turn (which I will refer to as a 'tick')
@@ -198,11 +77,8 @@ class Game extends React.Component<GameProps, IState> {
 
     // Runs a quest every 50 years
     if (this.world.years % 50 === 0) {
-      if (this.world.cardIndex < CARDS.length) {
-        let question = this.state.question
-        question = this._createQuestQuestion()
-        this.setState({ question, modal: true })
-      }
+      this.deck.unlockCard(3)
+      return
     }
 
     // Refresh the screen now that everything has been compiled for the next tick
@@ -351,20 +227,25 @@ class Game extends React.Component<GameProps, IState> {
     }
   }
 
+  activateCard (card : Card) {
+    this.deck.playCard(card)
+    this.setState({})
+  }
+
   // Maps out and renders each card that is unlocked in the deck
   _renderCardDeck () {
-    return CARDS
+    return this.deck.getDeck()
       .map((item) => {
-        if (item.unlocked && item.popcost > 0) {
+        if (item.popcost > 0) {
           return (
             <View key={item.name}>
-              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this.activateCard(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
                 </View>
                 <View style={{ justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.description}</Text>
+                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
                 </View>
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
@@ -375,16 +256,16 @@ class Game extends React.Component<GameProps, IState> {
               </View>
             </View>
           )
-        } else if (item.unlocked) {
+        } else {
           return (
             <View key={item.name}>
-              <TouchableOpacity onPress={() => this._conductCardAction(item)} style={styles.card}>
+              <TouchableOpacity onPress={() => this.activateCard(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
                 </View>
                 <View style={{ justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.description}</Text>
+                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
                 </View>
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
@@ -451,7 +332,7 @@ class Game extends React.Component<GameProps, IState> {
               <View style={{ flexDirection: 'row' }}>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={() => this._processQuestQuestion(true)}
+                    onPress={() => {}}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>
@@ -461,7 +342,7 @@ class Game extends React.Component<GameProps, IState> {
                 </View>
                 <View style={styles.toolbarbutton}>
                   <TouchableHighlight
-                    onPress={() => this._processQuestQuestion(false)}
+                    onPress={() => {}}
                     underlayColor='#c4c4c4'
                   >
                     <View style={styles.button}>

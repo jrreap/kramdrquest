@@ -16,6 +16,9 @@ import { Ionicons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-ico
 import { Card, GameProps } from '../types'
 import { World, Combat, Economy, CardDeck } from '../core'
 
+import CombatMenu from './Game/CombatMenu'
+import KingdomSeal from './Game/KingdomSeal'
+
 interface IState {
   modal: boolean,
   question: string
@@ -85,155 +88,13 @@ class Game extends React.Component<GameProps, IState> {
     this.setState({})
   }
 
-  // Returns the UI for combat
-  _returnCombatMenu () {
-    const { inBattle, fortifications, enemyCount, currentEnemy, currentWarrior} = this.world
-    if (inBattle) {
-      if (fortifications > 1) {
-        return (
-          <View style={styles.combatcontainer}>
-            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemyCount}</Text>
-            <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
-              <Text style={{ padding: 10 }}>VS</Text>
-              <MaterialCommunityIcons name='wall' size={32} />
-              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
-            </View>
-          </View>
-        )
-      } else if (fortifications === 1) {
-        return (
-          <View style={styles.combatcontainer}>
-            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemyCount}</Text>
-            <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
-              <Text style={{ padding: 10 }}>VS</Text>
-              <MaterialCommunityIcons color='red' name='wall' size={32} />
-              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
-            </View>
-          </View>
-        )
-      } else {
-        return (
-          <View style={styles.combatcontainer}>
-            <Text style={{ fontWeight: 'bold', fontSize: 20 }}>In Combat!</Text>
-            <Text>Enemy Strength: {enemyCount}</Text>
-            <View style={styles.combatinnercontainer}>
-              <MaterialCommunityIcons name={currentEnemy.icon} size={32} />
-              <Text style={{ padding: 10 }}>VS</Text>
-              <MaterialCommunityIcons name={currentWarrior.icon} size={32} />
-            </View>
-          </View>
-        )
-      }
-    } else {
-      return (
-        <View style={styles.combatcontainer}>
-          <MaterialCommunityIcons name='flower-tulip' color='#b197fc' size={32} />
-          <Text style={styles.paragraph}>Our Kingdom is at Peace Sire! Your income can now be collected and peasants recruited.</Text>
-        </View>
-      )
-    }
-  }
-
-  // Returns the seal of the kingdom based on the level and game
-  _returnKingdomSeal () {
-    const { seal } = this.world
-    switch (seal.level) {
-      case (0): {
-        return (
-          <View style={{ flexDirection: 'row' }}>
-            <MaterialCommunityIcons name={seal.icon} size={65} />
-          </View>
-        )
-      }
-      case (1): {
-        return (
-          <View style={{ flexDirection: 'row' }}>
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} name={seal.icon} size={65} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-          </View>
-        )
-      }
-      case (2): {
-        return (
-          <View style={{ flexDirection: 'row' }}>
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} name={seal.icon} size={65} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-          </View>
-        )
-      }
-      case (3): {
-        return (
-          <View style={{ flexDirection: 'row' }}>
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} name={seal.icon} size={65} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-          </View>
-        )
-      }
-      case (4): {
-        return (
-          <View>
-            <View style={{ flexDirection: 'row' }}>
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} color='red' name={seal.icon} size={65} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            </View>
-          </View>
-        )
-      }
-      case (5): {
-        return (
-          <View>
-            <View style={{ flexDirection: 'row' }}>
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} color='red' name={seal.icon} size={65} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='medal' size={35} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='star-circle-outline' size={35} />
-            </View>
-          </View>
-        )
-      }
-      case (6): {
-        return (
-          <View>
-            <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='red' name='crown' size={45} />
-            <View style={{ flexDirection: 'row' }}>
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='trophy-outline' size={35} />
-              <MaterialCommunityIcons style={{ padding: 5, alignSelf: 'center' }} color='red' name={seal.icon} size={65} />
-              <MaterialCommunityIcons style={{ alignSelf: 'center' }} color='gold' name='trophy-outline' size={35} />
-            </View>
-          </View>
-        )
-      }
-    }
-  }
-
   activateCard (card : Card) {
     this.deck.playCard(card)
     this.setState({})
   }
 
   // Maps out and renders each card that is unlocked in the deck
-  _renderCardDeck () {
+  renderCardDeck () {
     return this.deck.getDeck()
       .map((item) => {
         if (item.popcost > 0) {
@@ -279,9 +140,9 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   // Adds in spacers to the array to make the deck look a bit fancier
-  _processCardDeck () {
+  processCardDeck () {
     let i = 1
-    const data = this._renderCardDeck()
+    const data = this.renderCardDeck()
     while (i <= data.length) {
       data.splice(i, 0, <View key={i} style={styles.spacer} />)
       i += 2
@@ -357,14 +218,14 @@ class Game extends React.Component<GameProps, IState> {
 
         <View style={styles.innercontainer}>
 
-          {this._returnKingdomSeal()}
+          <KingdomSeal world={this.world} />
 
           <Text style={styles.header}>
             KramdrQuest
           </Text>
           <Text style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 5 }}>Years In Power: {years}</Text>
 
-          {this._returnCombatMenu()}
+          <CombatMenu world={this.world} />
 
           <View style={styles.toolbarbutton}>
             <TouchableHighlight
@@ -387,7 +248,7 @@ class Game extends React.Component<GameProps, IState> {
                   <Text>This is the card deck, tap a card to use it to help keep your kingdom under control!</Text>
                   <ScrollView contentContainerStyle={{ padding: 5, justifyContent: 'space-between' }} style={styles.carddeck} horizontal>
 
-                    {this._processCardDeck()}
+                    {this.processCardDeck()}
 
                   </ScrollView>
                 </View>

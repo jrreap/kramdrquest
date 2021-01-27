@@ -12,6 +12,8 @@ export type NewGameProps = StackScreenProps<RootStackParamList, 'NewGame'>
 export type GameProps = StackScreenProps<RootStackParamList, 'Game'>
 export type DefeatProps = StackScreenProps<RootStackParamList, 'Defeat'>
 
+export type GameChildProps = { world: World }
+
 // Game types
 export type KingdomSeal = { 
   icon: 'sword' | 'cupcake' | 'ship-wheel' | 'ubuntu' | 'cat' | 'castle'

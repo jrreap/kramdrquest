@@ -242,7 +242,7 @@ class Game extends React.Component<GameProps, IState> {
             {dragHandler => (
               <View style={styles.panel}>
                 <TouchableOpacity activeOpacity={0.7} onPress={() => this._panel.show()} style={styles.panelHeader}>
-                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Card Deck</Text>
+                  <Text style={{ color: '#FFF', fontWeight: 'bold' }}>Kingdom Cards</Text>
                 </TouchableOpacity>
                 <View style={styles.cardcontainer}>
                   <Text>This is the card deck, tap a card to use it to help keep your kingdom under control!</Text>

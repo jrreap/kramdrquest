@@ -14,7 +14,8 @@ class CardDeck {
     this.worldData = world
     this.worldEconomy = eco
     // Unlock starting cards
-    this.unlockCard(0)
+    const card = this.findAvailableCardByID(0)
+    this.unlockCard(<Card>card)
   }
 
   public unlockCard (card : Card) {
@@ -27,6 +28,16 @@ class CardDeck {
 
   public getDeckCard (id: number) {
     for (const card of this.deck) {
+      if (card.id === id) {
+        return card
+      }
+    }
+
+    return null
+  }
+
+  public findAvailableCardByID (id : number) {
+    for (const card of this.availableCards) {
       if (card.id === id) {
         return card
       }

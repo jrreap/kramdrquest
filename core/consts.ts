@@ -94,6 +94,14 @@ export const styles = StyleSheet.create({
     padding: 10,
     maxHeight: 280
   },
+  researchCardContainer : {
+    flex: 1,
+    padding: 5,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    maxHeight: 280
+  },
   actioncontainer: {
     flex: 1,
     alignItems: 'center',

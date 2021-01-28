@@ -19,9 +19,6 @@ class Research {
     const card2 = cards[rollCustomDice(cards.length - 1)]
     const card3 = cards[rollCustomDice(cards.length - 1)]
 
-    console.log(card1)
-    console.log(card2)
-
     return [card1, card2, card3]
   }
 

@@ -52,6 +52,8 @@ class Game extends React.Component<GameProps, IState> {
     }
 
     this.nextTurn = this.nextTurn.bind(this)
+    this.selectResearchCard = this.selectResearchCard.bind(this)
+    this.activateCard = this.activateCard.bind(this)
   }
 
   nextTurn () {
@@ -103,14 +105,21 @@ class Game extends React.Component<GameProps, IState> {
     this.setState({})
   }
 
+  selectResearchCard (card : Card) {
+    this.research.selectResearch(card)
+    console.log('Research!')
+    console.log(card)
+    this.setState({ modal: false })
+  }
+
   // Maps out and renders each card that is unlocked in the deck
-  renderCardDeck (deck : Card[]) {
+  renderCardDeck (deck : Card[], actionFunction : Function) {
     return deck
       .map((item) => {
         if (item.popcost > 0) {
           return (
             <View key={item.name}>
-              <TouchableOpacity onPress={() => this.activateCard(item)} style={styles.card}>
+              <TouchableOpacity onPress={() => actionFunction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -130,7 +139,7 @@ class Game extends React.Component<GameProps, IState> {
         } else {
           return (
             <View key={item.name}>
-              <TouchableOpacity onPress={() => this.activateCard(item)} style={styles.card}>
+              <TouchableOpacity onPress={() => actionFunction(item)} style={styles.card}>
                 <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
@@ -150,10 +159,10 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   // Adds in spacers to the array to make the deck look a bit fancier
-  processCardDeck () {
+  processCardDeck (deck : Card[], actionFunction: Function) {
     let i = 1
-    const data = this.renderCardDeck(this.deck.getDeck())
-    while (i <= data.length) {
+    const data = this.renderCardDeck(deck, actionFunction)
+    while (i <= data.length - 1) {
       data.splice(i, 0, <View key={i} style={styles.spacer} />)
       i += 2
     }
@@ -193,15 +202,12 @@ class Game extends React.Component<GameProps, IState> {
 
         <Modal
           animationType='slide'
-          transparent
           visible={this.state.modal}
         >
           <View style={styles.popupcontainer}>
-            <View style={styles.popupinnercontainer}>
-              <Text style={{ fontSize: 18, alignContent: 'center', padding: 5 }}>Sire! We have 3 possible directions of research. What new tech do you wish us to start working on?</Text>
-              <View style={styles.cardcontainer}>
-                  {this.renderCardDeck(this.state.researchOptions)}
-              </View>
+            <Text style={{ fontSize: 18, alignContent: 'center', justifyContent: 'center', padding: 5 }}>Sire! We have 3 possible directions of research. What new tech do you wish us to start working on?</Text>
+            <View style={styles.researchCardContainer}>
+                {this.processCardDeck(this.state.researchOptions, this.selectResearchCard)}
             </View>
           </View>
         </Modal>
@@ -238,7 +244,7 @@ class Game extends React.Component<GameProps, IState> {
                   <Text>This is the card deck, tap a card to use it to help keep your kingdom under control!</Text>
                   <ScrollView contentContainerStyle={{ padding: 5, justifyContent: 'space-between' }} style={styles.carddeck} horizontal>
 
-                    {this.processCardDeck()}
+                    {this.processCardDeck(this.deck.getDeck(), this.activateCard)}
 
                   </ScrollView>
                 </View>

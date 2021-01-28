@@ -84,16 +84,13 @@ class Game extends React.Component<GameProps, IState> {
     }
 
     // Completes a research at a base of 50 years, factoring in research speed
-    if (Math.floor(this.world.years % (50 / this.world.researchSpeed)) === 0) {
-      if (this.research.isResearching) {
+    if (this.research.isResearching) {
+      if (Math.floor(this.world.years % (50 / this.world.researchSpeed)) === 0) {
         this.research.attemptResearch()
         Alert.alert('Successfully completed research!')
         this.setState({ researchOptions: this.research.drawAvailableResearch()})
-      } else {
-        Alert.alert('You currently have no selected research! Make sure to select one!')
-        this.setState({})
+        return
       }
-      return
     }
 
     // Refresh the screen now that everything has been compiled for the next tick
@@ -113,7 +110,7 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   // Maps out and renders each card that is unlocked in the deck
-  renderCardDeck (deck : Card[], actionFunction : Function) {
+  renderCardDeck (deck : Card[], actionFunction : Function, withDesc : boolean) {
     return deck
       .map((item) => {
         if (item.popcost > 0) {
@@ -124,14 +121,16 @@ class Game extends React.Component<GameProps, IState> {
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
                 </View>
-                <View style={{ justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
-                </View>
+                {withDesc &&
+                  <View style={{ justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
+                  </View>
+                }
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
                 <FontAwesome5 name='coins' color='gold' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.cost}</Text>
-                <Ionicons style={{ paddingLeft: 5 }} name='md-person' color='black' size={32} />
+                <Ionicons style={{ paddingLeft: 3 }} name='md-person' color='black' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.popcost}</Text>
               </View>
             </View>
@@ -144,9 +143,11 @@ class Game extends React.Component<GameProps, IState> {
                   <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
                   <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
                 </View>
-                <View style={{ justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
-                </View>
+                {withDesc &&
+                  <View style={{ justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
+                  </View>
+                }
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
                 <FontAwesome5 name='coins' color='gold' size={32} />
@@ -159,9 +160,9 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   // Adds in spacers to the array to make the deck look a bit fancier
-  processCardDeck (deck : Card[], actionFunction: Function) {
+  processCardDeck (deck : Card[], actionFunction: Function, withDesc = true) {
     let i = 1
-    const data = this.renderCardDeck(deck, actionFunction)
+    const data = this.renderCardDeck(deck, actionFunction, withDesc)
     while (i <= data.length - 1) {
       data.splice(i, 0, <View key={i} style={styles.spacer} />)
       i += 2
@@ -207,7 +208,7 @@ class Game extends React.Component<GameProps, IState> {
           <View style={styles.popupcontainer}>
             <Text style={{ fontSize: 18, alignContent: 'center', justifyContent: 'center', padding: 5 }}>Sire! We have 3 possible directions of research. What new tech do you wish us to start working on?</Text>
             <View style={styles.researchCardContainer}>
-                {this.processCardDeck(this.state.researchOptions, this.selectResearchCard)}
+                {this.processCardDeck(this.state.researchOptions, this.selectResearchCard, false)}
             </View>
           </View>
         </Modal>

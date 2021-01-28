@@ -8,7 +8,7 @@ class ArrowStorm extends Card {
   constructor () {
     super()
     this.name = 'Arrow Storm'
-    this.desc = 'Have our archers rail death from above with a volley of arrows!'
+    this.desc = 'Have archers pick off some enemies!'
     this.id = 5
     this.cost = 10
     this.popcost = 0

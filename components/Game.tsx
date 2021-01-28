@@ -104,8 +104,6 @@ class Game extends React.Component<GameProps, IState> {
 
   selectResearchCard (card : Card) {
     this.research.selectResearch(card)
-    console.log('Research!')
-    console.log(card)
     this.setState({ modal: false })
   }
 

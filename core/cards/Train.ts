@@ -10,6 +10,7 @@ class Train extends Card {
     this.id = 3
     this.cost = 10
     this.popcost = 0
+    this.icon = 'flag'
   }
 
   public action(world: World) {

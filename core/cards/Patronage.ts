@@ -10,6 +10,7 @@ class Patronage extends Card {
     this.id = 4
     this.cost = 25
     this.popcost = 1
+    this.icon = 'book-outline'
   }
 
   public action(world: World) {

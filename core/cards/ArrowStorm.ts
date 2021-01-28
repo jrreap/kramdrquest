@@ -12,6 +12,7 @@ class ArrowStorm extends Card {
     this.id = 5
     this.cost = 10
     this.popcost = 0
+    this.icon = 'bullseye-arrow'
   }
 
   public action(world: World) {

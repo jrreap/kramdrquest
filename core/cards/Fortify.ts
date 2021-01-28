@@ -10,6 +10,7 @@ class Fortify extends Card {
     this.id = 2
     this.cost = 25
     this.popcost = 0
+    this.icon = 'shovel'
   }
 
   public action(world: World) {

@@ -10,6 +10,7 @@ class MooMula extends Card {
     this.id = 1
     this.cost = 0
     this.popcost = 10
+    this.icon = 'cow'
   }
 
   public action(world: World) {

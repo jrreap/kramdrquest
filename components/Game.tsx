@@ -169,6 +169,33 @@ class Game extends React.Component<GameProps, IState> {
     return data
   }
 
+  renderResearchButton () {
+    if (this.research.isResearching) {
+      return (
+        <TouchableHighlight
+          onPress={() => {this.setState({modal: true})}}
+          underlayColor='#c4c4c4'
+          disabled={true}
+        >
+          <View style={styles.actionButton}>
+            <Text style={{ textAlign: 'center', fontSize: 20, paddingLeft: 5 }}>Researching...</Text>
+          </View>
+        </TouchableHighlight>
+      )
+    } else {
+      return (
+        <TouchableHighlight
+          onPress={() => {this.setState({modal: true})}}
+          underlayColor='#c4c4c4'
+        >
+          <View style={styles.actionButton}>
+            <Text style={{ textAlign: 'center', fontSize: 20, paddingLeft: 5 }}>Select Research</Text>
+          </View>
+        </TouchableHighlight>
+      )
+    }
+  }
+
   render () {
     const draggableRange = {
       top: Dimensions.get('window').height / 2,
@@ -248,14 +275,7 @@ class Game extends React.Component<GameProps, IState> {
                   </ScrollView>
                 </View>
                 <View style={styles.actioncontainer}>
-                  <TouchableHighlight
-                    onPress={() => {this.setState({modal: true})}}
-                    underlayColor='#c4c4c4'
-                  >
-                    <View style={styles.actionButton}>
-                      <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', paddingLeft: 5 }}>Select Research</Text>
-                    </View>
-                  </TouchableHighlight>
+                  {this.renderResearchButton()}
                 </View>
               </View>
             )}

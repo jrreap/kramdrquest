@@ -6,7 +6,7 @@ import shuffle from 'lodash/shuffle'
 class Research {
   private worldDeck : CardDeck
 
-  private currentResearch : Card | null = null
+  private currentResearch : Card | undefined = undefined
 
   constructor (deck : CardDeck) {
     this.worldDeck = deck
@@ -27,7 +27,7 @@ class Research {
   }
 
   public get isResearching () {
-    return this.currentResearch !== null
+    return this.currentResearch !== undefined
   }
 
   public selectResearch (card : Card) {
@@ -35,9 +35,9 @@ class Research {
   }
 
   public attemptResearch () {
-    if (this.currentResearch !== null) {
+    if (this.currentResearch !== undefined) {
       this.worldDeck.unlockCard(this.currentResearch)
-      this.currentResearch = null
+      this.currentResearch = undefined
     }
   }
 

@@ -5,10 +5,12 @@ import Defeat from './components/Defeat'
 import Game from './components/Game'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
+import { enableScreens } from 'react-native-screens'
 
 // Export the entry point for React Native
 
 const Stack = createStackNavigator()
+enableScreens()
 
 export default function App () {
   const screenOptions={

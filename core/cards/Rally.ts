@@ -1,11 +1,11 @@
 import Card from './Card'
 import World from '../World'
 
-class Guardian extends Card {
+class Rally extends Card {
 
   constructor () {
     super()
-    this.name = 'Guardian'
+    this.name = 'Rally'
     this.desc = 'Recruit more peasants into guards'
     this.id = 0
     this.cost = 5
@@ -17,4 +17,4 @@ class Guardian extends Card {
   }
 }
 
-export default Guardian
+export default Rally

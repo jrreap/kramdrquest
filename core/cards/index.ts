@@ -1,6 +1,6 @@
 import ArrowStorm from './ArrowStorm'
-import Guardian from './Guardian'
-import GuardianII from './GuardianII'
+import Rally from './Rally'
+import RallyII from './RallyII'
 import Fortify from './Fortify'
 import MooMula from './MooMula'
 import Patronage from './Patronage'
@@ -11,8 +11,8 @@ import Card from './Card'
 // Export a list of instances of every Card class we have
 const Cards : Card[] = [
   new ArrowStorm,
-  new Guardian,
-  new GuardianII,
+  new Rally,
+  new RallyII,
   new Fortify,
   new MooMula,
   new Patronage,

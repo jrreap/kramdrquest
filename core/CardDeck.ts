@@ -19,6 +19,13 @@ class CardDeck {
   }
 
   public unlockCard (card : Card) {
+    if (card.unlockDanger > 1) {
+      const cardClass = card.name.split(' ')[0]
+      this.deck = this.deck.filter((item) => {
+        return !item.name.includes(cardClass)
+      })
+    }
+
     this.deck.push(card)
 
     this.availableCards = this.availableCards.filter((item) => {

@@ -60,7 +60,8 @@ class Game extends React.Component<GameProps, IState> {
     if (this.world.inBattle) {
       const isAlive = this.combat.conductBattle()
       if (!isAlive) {
-        this.props.navigation.push('Defeat', {years: this.world.years})
+        const cards = this.deck.getDeck().length
+        this.props.navigation.push('Defeat', {years: this.world.years, cards})
       }
     } else {
       this.combat.conductPeace()

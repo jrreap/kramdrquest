@@ -5,7 +5,7 @@ import Card from './core/cards/Card'
 export type RootStackParamList = {
   NewGame: undefined
   Game: { world: World }
-  Defeat: { years: number }
+  Defeat: { years: number, cards: number }
 }
 
 export type NewGameProps = StackScreenProps<RootStackParamList, 'NewGame'>

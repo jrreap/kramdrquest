@@ -13,45 +13,8 @@ import { DefeatProps } from '../types'
 
 // Defeat screen, if you die this is where you go
 class Defeat extends React.Component<DefeatProps> {
-  // Calculates the end game stats
-  _calcStats () {
-    const stats = []
-    let i
-    let c = 0
-    for (i = 0; i < CARDS.length; i++) {
-      if (CARDS[i].unlocked) {
-        c++
-      }
-    }
-
-    // Did you discover the special Kramdr card?
-    if (CARDS[CARDS.length - 1].unlocked) {
-      stats[1] = true
-    }
-
-    stats[0] = c
-
-    return stats
-  }
-
-  _renderKramdr (stats) {
-    if (stats[1]) {
-      return (
-        <View>
-          <Animatable.Image animation='fadeInUp' delay={2000} style={{ width: 200, height: 300, padding: 10, alignSelf: 'center', borderRadius: 10 }} source={require('../assets/wonder.png')} />
-          <Animatable.Text animation='fadeInUp' delay={2000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Quite thoughtful isnt he?</Animatable.Text>
-        </View>
-      )
-    } else {
-      return (
-        <Animatable.Text animation='fadeInUp' delay={2000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>The great Kramdr has eluded you...</Animatable.Text>
-      )
-    }
-  }
-
   render () {
-    const stats = this._calcStats()
-
+    const unlockedCards = this.props.route.params.cards
     return (
       <Animatable.View style={styles.container} animation='fadeIn' duration='1000' iterationCount={1} easing='ease-in'>
         <View style={styles.innercontainer}>
@@ -62,9 +25,7 @@ class Defeat extends React.Component<DefeatProps> {
           <Text style={{ fontSize: 18, fontWeight: 'bold', paddingBottom: 30 }}>
             Years In Power: {this.props.route.params.years ?? 0}
           </Text>
-          <Animatable.Text animation='fadeInLeft' delay={1000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Cards discovered: {stats[0]}</Animatable.Text>
-
-          {this._renderKramdr(stats)}
+          <Animatable.Text animation='fadeInLeft' delay={1000} style={{ fontWeight: 'bold', fontSize: 20, paddingBottom: 10 }}>Cards discovered: {unlockedCards}</Animatable.Text>
 
           <TouchableHighlight
             style={{ paddingTop: 10 }}

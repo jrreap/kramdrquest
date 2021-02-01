@@ -86,7 +86,7 @@ class Game extends React.Component<GameProps, IState> {
 
     // Completes a research at a base of 50 years, factoring in research speed
     if (this.research.isResearching) {
-      if (Math.floor(this.world.years % (50 / this.world.researchSpeed)) === 0) {
+      if (this.research.isResearchComplete(this.world.years)) {
         this.research.attemptResearch()
         Alert.alert('Successfully completed research!')
         this.setState({ researchOptions: this.research.drawAvailableResearch()})
@@ -104,7 +104,7 @@ class Game extends React.Component<GameProps, IState> {
   }
 
   selectResearchCard (card : Card) {
-    this.research.selectResearch(card)
+    this.research.selectResearch(card, this.world.years)
     this.setState({ modal: false })
   }
 

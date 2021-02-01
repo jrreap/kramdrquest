@@ -7,6 +7,7 @@ class Research {
   private worldDeck : CardDeck
 
   private currentResearch : Card | undefined = undefined
+  private startYear : number = 0
 
   constructor (deck : CardDeck) {
     this.worldDeck = deck
@@ -35,8 +36,17 @@ class Research {
     return this.currentResearch !== undefined
   }
 
-  public selectResearch (card : Card) {
+  public isResearchComplete (currentYear : number) {
+    if (currentYear >= this.startYear + 50) {
+      return true
+    }
+
+    return false
+  }
+
+  public selectResearch (card : Card, year : number) {
     this.currentResearch = card
+    this.startYear = year
   }
 
   public attemptResearch () {

@@ -16,7 +16,12 @@ class Research {
     let cards = this.worldDeck.getAvailableCards()
     cards = shuffle(cards)
 
-    const selectedCards : Card[] = []
+    let selectedCards : Card[] = []
+
+    if (cards.length < 3) {
+      selectedCards = cards
+      return selectedCards
+    }
 
     // Force draw 3 unique cards
     for (let i = 0; i < 3; i++) {

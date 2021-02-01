@@ -111,49 +111,35 @@ class Game extends React.Component<GameProps, IState> {
   renderCardDeck (deck : Card[], actionFunction : Function, withDesc : boolean) {
     return deck
       .map((item) => {
-        if (item.popcost > 0) {
-          return (
-            <View key={item.name}>
-              <TouchableOpacity onPress={() => actionFunction(item)} style={styles.card}>
-                <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
-                  <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
-                  <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
+        return (
+          <View key={item.name}>
+            <TouchableOpacity onPress={() => actionFunction(item)} style={styles.card}>
+              <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
+                <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
+                <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
+              </View>
+              {withDesc &&
+                <View style={{ justifyContent: 'center' }}>
+                  <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
                 </View>
-                {withDesc &&
-                  <View style={{ justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
-                  </View>
-                }
-              </TouchableOpacity>
-              <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
+              }
+            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
+              {item.cost > 0 &&
+              <>
                 <FontAwesome5 name='coins' color='gold' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.cost}</Text>
+              </>
+              }
+              {item.popcost > 0 &&
+              <>
                 <Ionicons style={{ paddingLeft: 3 }} name='md-person' color='black' size={32} />
                 <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.popcost}</Text>
-              </View>
+              </>
+              }
             </View>
-          )
-        } else {
-          return (
-            <View key={item.name}>
-              <TouchableOpacity onPress={() => actionFunction(item)} style={styles.card}>
-                <View style={{ paddingBottom: 5, justifyContent: 'center' }}>
-                  <MaterialCommunityIcons style={{ alignSelf: 'center' }} name={item.icon} color='black' size={32} />
-                  <Text style={{ fontSize: 25, alignSelf: 'center', padding: 5 }}>{item.name}</Text>
-                </View>
-                {withDesc &&
-                  <View style={{ justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 12, alignSelf: 'center', padding: 5 }}>{item.desc}</Text>
-                  </View>
-                }
-              </TouchableOpacity>
-              <View style={{ flexDirection: 'row', paddingTop: 10, justifyContent: 'center', alignItems: 'center' }}>
-                <FontAwesome5 name='coins' color='gold' size={32} />
-                <Text style={{ fontSize: 20, fontWeight: 'bold', paddingLeft: 3 }}>{item.cost}</Text>
-              </View>
-            </View>
-          )
-        }
+          </View>
+        )
       })
   }
 

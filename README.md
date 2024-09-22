@@ -1,7 +1,7 @@
 ## Project KramdrQuest
 Developed by Jrreap Spring of 2019.
 
-Used and displayed during the Charter School of Wilmington's Mobile Application's class
+Used and displayed during a Mobile Application's class
 
 Built in React-Native and utilizing the expo framework.
 
